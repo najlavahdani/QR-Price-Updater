@@ -1,0 +1,37 @@
+# =========================
+# Python cache and bytecode
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# =========================
+# Virtual environment
+# =========================
+QR_project_venv/
+
+
+# =========================
+# SQLite database and data folder
+# =========================
+data/
+*.db
+
+# =========================
+# IDE / Editor settings
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# Logs and temporary files
+# =========================
+*.log
+*.tmp
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
