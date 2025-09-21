@@ -16,3 +16,10 @@ class Products(Base):
     
     
 
+# general settings table
+class Settings(Base):
+    __tablename__ = "settings"
+    
+    id= Column(Integer, primary_key=True, autoincrement=True)
+    currency= Column(String, unique=True, nullable=False)
+    exchange_rate= Column(Numeric(10,2), nullable=False)
