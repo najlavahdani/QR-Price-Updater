@@ -2,7 +2,7 @@ import os
 from typing import List, Dict
 from decimal import Decimal
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
 from src.db.models import Base, Products
@@ -79,3 +79,10 @@ class DatabaseManager:
     def get_product_by_id(self, product_id: str):
         with self.Session as session:
             return session.query(Products).filter_by(product_id=product_id).one_or_none()
+        
+    def get_product_by_name(self, name: str):
+        #fetch all products whose names contain text (case insensetive)
+        with self.Session() as session:
+            statement= select(Products).where(Products.name.ilike(f"%{name}%"))
+            result= session.execute(statement).scalars().all()
+            return result
