@@ -69,4 +69,9 @@ class DatabaseManager:
             except Exception as exc:
                 session.rollback()
                 raise
-        return results    
+        return results
+    
+    
+    def get_all_products(self):
+        with self.Session as session:
+            return session.query(Products).all()
