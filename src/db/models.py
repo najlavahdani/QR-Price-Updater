@@ -11,7 +11,7 @@ class Products(Base):
     id= Column(Integer, primary_key=True, autoincrement=True)
     product_id= Column(String, unique=True, nullable=False)
     name= Column(String, nullable=False)
-    price= Column(Float, nullable=False)
+    price= Column(Numeric(10,2), nullable=False)
     qr_path= Column(String, nullable=True)
     
     
