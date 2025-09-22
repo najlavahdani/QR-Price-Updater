@@ -1,6 +1,6 @@
 import pandas as pd
 
-REQUIRED_COLUMNS = ["product_id", "Name", "PriceUSD"]
+REQUIRED_COLUMNS = ["ProductID", "Name", "PriceUSD"]
 
 def load_products_from_excel(file_path: str):
     # reading excel file as a data frame
