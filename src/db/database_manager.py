@@ -1,9 +1,11 @@
 import os
+from typing import List, Dict
+from decimal import Decimal
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.db.models import Base
+from src.db.models import Base, Products
  
 
 BASE_DIR= os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -18,3 +20,53 @@ class DatabaseManager:
         #creating tables if not exists
         Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind= self.engine, autiflush=False, future=True)
+        
+        
+    def insert_or_update_products(self, products: List[Dict]) -> List[Dict]:
+        """
+        products: list of dicts with keys ProductID, Name, PriceUSD
+        Returns list of result dicts: {'product_id': ..., 'action': 'inserted'|'updated'|'skipped', 'reason': ...}
+        """
+        results= []
+        with self.Session as session:
+            try: 
+                for p in products:
+                    pid= str(p.get("ProductID")).strip()
+                    name= str(p.get("Name")).strip
+                    try:
+                        price = Decimal(str(p.get("PriceUSD")))
+                    except Exception:
+                        results.append({"product_id": pid, "action": "skipped", "reason": "invalid PriceUSD"})
+                        continue
+                    
+                    #ProductID shouldn't be null
+                    if not pid:
+                        results.append({"product_id": None, "action": "skipped", "reason": "empty ProductID"})
+                        continue
+                    
+                    #check if the current product is already exists in DB or not: None if doesn't exists| Products object if exists
+                    existing = session.query(Products).filter_by(product_id=pid).one_or_none()
+                    if existing: #True if the current product already exists in DB
+                        # the product will update only if there is a difference
+                        changed= False
+                        if existing.name != name:
+                            existing.name = name
+                            changed= True
+                        if Decimal(str((existing.price))) != price:
+                            existing.price = price
+                            changed= True
+                        
+                        if changed: #True if update the product 
+                            results.append({"product_id": pid, "action": "updated"})
+                        else:
+                            results.append({"product_id": pid, "action": "skipped", "reason": "already exist, with no changes"})
+                            
+                    else: #new product
+                        new= Products(product_id=pid, name=name, price=price, qr_path=None)
+                        session.add(new)
+                        results.append({"product_id": pid, "action": "inserted"})
+                session.commit()
+            except Exception as exc:
+                session.rollback()
+                raise
+        return results    
