@@ -2,7 +2,6 @@ import os
 
 folders = [
     "src",
-    "scripts",
     "data",
     "src/db",
     "src/utils",
