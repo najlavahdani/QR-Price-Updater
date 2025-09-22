@@ -75,3 +75,7 @@ class DatabaseManager:
     def get_all_products(self):
         with self.Session as session:
             return session.query(Products).all()
+        
+    def get_product_by_id(self, product_id: str):
+        with self.Session as session:
+            return session.query(Products).filter_by(product_id=product_id).one_or_none()
