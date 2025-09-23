@@ -55,3 +55,18 @@ def test_get_products_by_name():
     ids = [p.product_id for p in keyboards]
     assert "P300" in ids
     assert "P301" in ids
+    
+    
+def test_get_all_products():
+    db = setup_temp_db()
+    
+    products = [
+        {"ProductID": "P400", "Name": "Tablet Samsung", "PriceUSD": "300.00"},
+        {"ProductID": "P401", "Name": "Tablet Apple", "PriceUSD": "800.00"},
+    ]
+    db.insert_or_update_products(products)
+    
+    all_products = db.get_all_products()
+    ids = [p.product_id for p in all_products]
+    assert "P401" in ids
+    assert "P400" in ids
