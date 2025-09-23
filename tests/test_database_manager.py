@@ -39,7 +39,7 @@ def test_get_product_by_id():
     
     retrieved_prod = db.get_product_by_id("P200")
     assert retrieved_prod is not None
-    assert retrieved_prod.neme == "Mouse Logitech"
+    assert retrieved_prod.name == "Mouse Logitech"
     assert retrieved_prod.price == Decimal("25.99")
 
 
