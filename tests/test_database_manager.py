@@ -37,3 +37,21 @@ def test_get_product_by_id():
     assert retrieved_prod is not None
     assert retrieved_prod.neme == "Mouse Logitech"
     assert retrieved_prod.price == Decimal(25.99)
+
+
+def test_get_products_by_name():
+    db = setup_temp_db()
+    
+    products = [
+        {"ProductID": "P300", "Name": "Keyboard Logitech", "PriceUSD": "45.00"},
+        {"ProductID": "P301", "Name": "Keyboard Dell", "PriceUSD": "55.00"},
+        {"ProductID": "P302", "Name": "Monitor LG", "PriceUSD": "150.00"},
+    ]
+    
+    db.insert_or_update_products(products)
+    
+    keyboards = db.get_product_by_name("Keyboard")
+    assert len(keyboards) == 2
+    ids = [p.product_id for p in keyboards]
+    assert "P300" in ids
+    assert "P301" in ids
