@@ -19,7 +19,7 @@ class DatabaseManager:
         self.engine = create_engine(db_url, echo= False, future= True)
         #creating tables if not exists
         Base.metadata.create_all(self.engine)
-        self.Session = sessionmaker(bind= self.engine, autiflush=False, future=True)
+        self.Session = sessionmaker(bind= self.engine, autoflush=False, future=True)
         
         
     def insert_or_update_products(self, products: List[Dict]) -> List[Dict]:
