@@ -1,5 +1,5 @@
 from src.db.database_manager import DatabaseManager
-
+from decimal import Decimal
 
 def setup_temp_db():
     #creating temporary database 
@@ -24,4 +24,6 @@ def test_insert_update_product():
     update_result= db.insert_or_update_products([prod_to_update])
     assert update_result[0]["action"] == "updated"
     updated_prod = db.get_product_by_id("P100")
-    assert str(updated_prod.price) == "1100.00"
+    assert updated_prod.price == Decimal(1100.00)
+    
+
