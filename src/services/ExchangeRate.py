@@ -23,3 +23,7 @@ class ExchangeRate:
             return setting.exchange_rate
         else:
             raise ValueError(f"No exchange rate set for {currency}")
+        
+    def calculate_price(self, usd_price: Decimal, currency: str) -> Decimal:
+        rate= self.get_rate(currency)
+        return usd_price*rate
