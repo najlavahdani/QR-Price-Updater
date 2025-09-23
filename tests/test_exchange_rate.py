@@ -26,3 +26,13 @@ def test_update_rate():
     
     rate= ex_rate.get_rate("USD")
     assert rate == Decimal("65000")
+    
+
+def test_calculate_price():
+    session = setup_temp_session()
+    ex_rate = ExchangeRate(session)
+    
+    ex_rate.set_rate("USD", Decimal("60000"))
+    result= ex_rate.calculate_price(Decimal("2"), "USD")
+    
+    assert Decimal(120000) == result
