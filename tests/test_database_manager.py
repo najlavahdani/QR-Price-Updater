@@ -26,6 +26,10 @@ def test_insert_update_product():
     updated_prod = db.get_product_by_id("P100")
     assert updated_prod.price == Decimal("1100.00")
     
+    #update test with no changes in database
+    prod_no_change = {"ProductID": "P101", "Name": "Laptop HP", "PriceUSD": "950.75"}
+    no_change_result= db.insert_or_update_products([prod_no_change])
+    assert no_change_result[0]["action"] == "skipped"
 
 def test_get_product_by_id():
     db = setup_temp_db()
