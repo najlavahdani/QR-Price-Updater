@@ -19,5 +19,9 @@ def test_insert_update_product():
     assert insertion_result[0]["action"] == "inserted"
     assert insertion_result[1]["action"] == "inserted"
     
-
-
+    #update test
+    prod_to_update={"ProductID": "P100", "Name": "Laptop Dell", "PriceUSD": "1100.00"}
+    update_result= db.insert_or_update_products([prod_to_update])
+    assert update_result[0]["action"] == "updated"
+    updated_prod = db.get_product_by_id("P100")
+    assert str(updated_prod.price) == "1100.00"
