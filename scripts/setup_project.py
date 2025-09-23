@@ -8,6 +8,7 @@ folders = [
     "src/ui",
     "assets",
     "assets/qrcodes"
+    "src/services"
 ]
 
 
@@ -19,3 +20,4 @@ for folder in folders:
 open("src/__init__.py", "a").close()
 open("src/db/__init__.py", "a").close()
 open("src/utils/__init__.py", "a").close()
+open("src/services/__init__.py", "a").close()
