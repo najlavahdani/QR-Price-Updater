@@ -16,3 +16,10 @@ class ExchangeRate:
             self.session.add(setting)
         self.session.commit()
         return setting #return the updated or new exchange setting
+    
+    def get_rate(self, currency: str) -> Decimal:
+        setting = self.session.query(Settings).filter_by(currency=currency).first()
+        if setting:
+            return setting.exchange_rate
+        else:
+            raise ValueError(f"No exchange rate set for {currency}")
