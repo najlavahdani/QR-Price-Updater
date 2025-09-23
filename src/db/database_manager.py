@@ -32,7 +32,7 @@ class DatabaseManager:
             try: 
                 for p in products:
                     pid= str(p.get("ProductID")).strip()
-                    name= str(p.get("Name")).strip
+                    name= str(p.get("Name")).strip()
                     try:
                         price = Decimal(str(p.get("PriceUSD")))
                     except Exception:
