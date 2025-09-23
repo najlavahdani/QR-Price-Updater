@@ -24,7 +24,7 @@ def test_insert_update_product():
     update_result= db.insert_or_update_products([prod_to_update])
     assert update_result[0]["action"] == "updated"
     updated_prod = db.get_product_by_id("P100")
-    assert updated_prod.price == Decimal(1100.00)
+    assert updated_prod.price == Decimal("1100.00")
     
 
 def test_get_product_by_id():
@@ -36,7 +36,7 @@ def test_get_product_by_id():
     retrieved_prod = db.get_product_by_id("P200")
     assert retrieved_prod is not None
     assert retrieved_prod.neme == "Mouse Logitech"
-    assert retrieved_prod.price == Decimal(25.99)
+    assert retrieved_prod.price == Decimal("25.99")
 
 
 def test_get_products_by_name():
