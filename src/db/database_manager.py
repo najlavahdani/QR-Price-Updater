@@ -28,7 +28,7 @@ class DatabaseManager:
         Returns list of result dicts: {'product_id': ..., 'action': 'inserted'|'updated'|'skipped', 'reason': ...}
         """
         results= []
-        with self.Session as session:
+        with self.Session() as session:
             try: 
                 for p in products:
                     pid= str(p.get("ProductID")).strip()
@@ -73,11 +73,11 @@ class DatabaseManager:
     
     
     def get_all_products(self):
-        with self.Session as session:
+        with self.Session() as session:
             return session.query(Products).all()
         
     def get_product_by_id(self, product_id: str):
-        with self.Session as session:
+        with self.Session() as session:
             return session.query(Products).filter_by(product_id=product_id).one_or_none()
         
     def get_product_by_name(self, name: str):
