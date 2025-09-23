@@ -7,7 +7,7 @@ folders = [
     "src/utils",
     "src/ui",
     "assets",
-    "assets/qrcodes"
+    "assets/qrcodes",
     "src/services"
 ]
 
