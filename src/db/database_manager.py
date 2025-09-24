@@ -64,8 +64,14 @@ class DatabaseManager:
                             results.append({"product_id": pid, "action": "skipped", "reason": "already exist, with no changes"})
                             
                     else: #new product
-                        new= Products(product_id=pid, name=name, price=price, qr_path=None)
-                        session.add(new)
+                        new_product= Products(product_id=pid, name=name, price=price, qr_path=None)
+                        session.add(new_product)
+                        session.flush() #temporary commit to get id
+                        
+                        #genearting qr code
+                        qr_file_path = self.qr_generator.generate_qr(pid)
+                        new_product.qr_path = qr_file_path
+                        
                         results.append({"product_id": pid, "action": "inserted"})
                 session.commit()
             except Exception as exc:
