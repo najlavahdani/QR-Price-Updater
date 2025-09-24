@@ -10,7 +10,7 @@ def setup_temp_db():
     db = DatabaseManager("sqlite:///:memory:")
     return db
 
-def insert_and_update_products_with_custom_qr():
+def test_insert_and_update_products_with_custom_qr():
     db = setup_temp_db()
     
     #custom qr generator
