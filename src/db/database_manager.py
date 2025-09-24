@@ -1,11 +1,10 @@
 import os
 from typing import List, Dict
 from decimal import Decimal
-
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
-
 from src.db.models import Base, Products
+from src.services.qrcode_generator import QRCodeGenerator
  
 
 BASE_DIR= os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -14,13 +13,16 @@ DB_PATH= os.path.join(DATA_DIR, "app.db")
 DB_URL= f"sqlite:///{DB_PATH}"
 
 
+
 class DatabaseManager:
-    def __init__(self, db_url: str = DB_URL):
+    def __init__(self, db_url: str = DB_URL, qr_base_url: str = "http://example.com"):
         self.engine = create_engine(db_url, echo= False, future= True)
         #creating tables if not exists
         Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind= self.engine, autoflush=False, future=True)
         
+        # create QR generator object (storage path is managed internally)
+        self.qr_generator= QRCodeGenerator(qr_base_url)
         
     def insert_or_update_products(self, products: List[Dict]) -> List[Dict]:
         """
