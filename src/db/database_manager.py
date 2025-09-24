@@ -24,7 +24,7 @@ class DatabaseManager:
         # create QR generator object (storage path is managed internally)
         self.qr_generator= QRCodeGenerator(qr_base_url)
         
-    def insert_or_update_products(self, products: List[Dict]) -> List[Dict]:
+    def insert_or_update_products(self, products: List[Dict], qrcode_generator: QRCodeGenerator=None) -> List[Dict]:
         """
         products: list of dicts with keys ProductID, Name, PriceUSD
         Returns list of result dicts: {'product_id': ..., 'action': 'inserted'|'updated'|'skipped', 'reason': ...}
@@ -68,9 +68,14 @@ class DatabaseManager:
                         session.add(new_product)
                         session.flush() #temporary commit to get id
                         
-                        #genearting qr code
-                        qr_file_path = self.qr_generator.generate_qr(pid)
-                        new_product.qr_path = qr_file_path
+                        if qrcode_generator:
+                            #generate qr with costum generator
+                            qr_file_path=qrcode_generator.generate_qr(pid)
+                            new_product.qr_path = qr_file_path
+                        else:
+                            #generating qr code with self.qr_generator
+                            qr_file_path = self.qr_generator.generate_qr(pid)
+                            new_product.qr_path = qr_file_path
                         
                         results.append({"product_id": pid, "action": "inserted"})
                 session.commit()
