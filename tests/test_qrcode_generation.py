@@ -35,5 +35,14 @@ def insert_and_update_products_with_custom_qr():
         assert prod.qr_path.startswith(QR_TEST_DIR)
         print(f"QR for {p['ProductID']} generated at: {prod.qr_path}")
         
-        
-        
+    qr_path_before_update= db.get_product_by_id("P900").qr_path 
+    #product update without changing QR
+    updated_product=  {"ProductID": "P900", "Name": "Test Product 1 Updated", "PriceUSD": "12.00"}
+    updating_result= db.insert_or_update_products(updated_product, qr_gen)
+    assert updating_result[0]["action"] == "updated"
+    
+    #checking that the QR code has not been changed
+    prod_after_update= db.get_product_by_id("P900")
+    qr_path_after_update = db.get_product_by_id("P900").qr_path
+    assert qr_path_before_update == qr_path_after_update
+    print(f"QR path after update remains: {prod_after_update.qr_path}")
