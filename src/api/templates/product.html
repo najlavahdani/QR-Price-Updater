@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>{{ product.name or "محصول" }}</title>
+        <meta name="description" content="product page">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+            body { font-family: Tahoma, Arial, sans-serif; direction: rtl; padding: 20px; }
+            .card { border: 1px solid #ddd; padding: 16px; border-radius: 8px; max-width: 400px; }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <h1>{{ product.name or "-" }}</h1>
+            <p>
+                <strong>قیمت: </strong>
+                {{ local_price }}
+            </p>
+        </div>        
+    </body>
+</html>
