@@ -38,7 +38,7 @@ def test_insert_and_update_products_with_custom_qr():
     qr_path_before_update= db.get_product_by_id("P900").qr_path 
     #product update without changing QR
     updated_product=  {"ProductID": "P900", "Name": "Test Product 1 Updated", "PriceUSD": "12.00"}
-    updating_result= db.insert_or_update_products(updated_product, qr_gen)
+    updating_result= db.insert_or_update_products([updated_product], qr_gen)
     assert updating_result[0]["action"] == "updated"
     
     #checking that the QR code has not been changed
