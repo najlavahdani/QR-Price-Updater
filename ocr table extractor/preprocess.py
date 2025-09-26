@@ -26,3 +26,12 @@ def deskew(gray):
     center = (w//2 , h//2)
     M = cv2.getRotationMatrix2D(center, angle, 1.0)
     return cv2.warpAffine(gray,M, (w,h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+
+#Converts the input image into a high-contrast binary (black and white) image.
+def enhance_for_orc(gray):
+    h, w = gray.shape
+    #If the image is small, it doubles it so that OCR works better.
+    if max(h, w)< 100:
+        gray = cv2.resize(gray, (w*2, h*2), interpolation=cv2.INTER_CUBIC)
+        blur= cv2.GaussianBlur(gray, (3,3), 0)
+        return cv2.adaptiveThreshold(blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 15, 3)
