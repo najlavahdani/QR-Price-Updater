@@ -30,3 +30,12 @@ def test_to_grayscale(tmp_image_path):
     assert len(gray.shape) == 2 #sigle-channel image
     assert gray.dtype == np.uint8 #the data type is correct and complies with the OpenCV standard
     assert np.all(gray==255) #stay completely white
+    
+def test_deskew_white_image(tmp_image_path):
+    p =Preprocessor()
+    img = p.read_image(tmp_image_path)
+    gray = p.to_grayscale(img)
+    result = p.deskew(gray)
+    #for white images it shouldn't  be changed
+    assert result.shape == gray.shape
+    assert np.all(result == gray)
