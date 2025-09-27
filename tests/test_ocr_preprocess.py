@@ -22,3 +22,11 @@ def test_read_image_invalid(tmp_image_path):
     p = Preprocessor()
     with pytest.raises(FileNotFoundError):
         p.read_image("non_existent_file.jpg")
+        
+def test_to_grayscale(tmp_image_path):
+    p= Preprocessor()
+    img= p.read_image(tmp_image_path)
+    gray= p.to_grayscale(img)
+    assert len(gray.shape) == 2 #sigle-channel image
+    assert gray.dtype == np.uint8 #the data type is correct and complies with the OpenCV standard
+    assert np.all(gray==255) #stay completely white
