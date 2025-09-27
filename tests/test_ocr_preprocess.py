@@ -51,3 +51,16 @@ def test_deskew_rotated_text():
     out= p.deskew(rotated)
     assert out.shape == rotated.shape
     assert np.any(out<255)
+    
+@pytest.mark.parameterize("resize_if_small", [True, False])
+def test_enhance_for_orc(temp_image_path, resize_if_small):
+    p= Preprocessor()
+    img = p.read_image(temp_image_path)
+    gray= p.to_grayscale(img)
+    result= p.enhance_for_orc(gray)
+    assert result.dtype == np.uint8
+    #the image must be black and white
+    assert set(np.unique(result)).issubset({0,255})
+    #if resize is enabled and image size is small, the size shpuld change
+    if resize_if_small and max(gray.shape)<100:
+        assert result.shape[0] > gray.shape[0] or result.shape[1] > gray.shape[1]
