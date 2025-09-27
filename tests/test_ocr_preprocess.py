@@ -39,3 +39,15 @@ def test_deskew_white_image(tmp_image_path):
     #for white images it shouldn't  be changed
     assert result.shape == gray.shape
     assert np.all(result == gray)
+    
+def test_deskew_rotated_text():
+    p = Preprocessor()
+    #gray img with small text
+    img = np.full((100,200), 255, dtype=np.uint8)
+    cv2.putText(img, "Test", (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 2, (0,), 3, cv2.LINE_AA)
+    #30 degree rotation
+    M = cv2.getRotationMatrix2D((100, 50), 30, 1)
+    rotated = cv2.warpAffine(img, M, (200,100), borderValue=255)
+    out= p.deskew(rotated)
+    assert out.shape == rotated.shape
+    assert np.any(out<255)
