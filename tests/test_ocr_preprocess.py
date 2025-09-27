@@ -6,8 +6,9 @@ import cv2
 
 @pytest.fixture
 def tmp_image_path():
-    os.makedirs("tests/tests_outputs/output_images", exist_ok=True)
-    path = "tests/output_images/white_img.jpg"
+    test_output_fold= "tests/tests_outputs/output_images"
+    os.makedirs(test_output_fold, exist_ok=True)
+    path = os.path.join(test_output_fold, "white_img.jpg")
     img = np.full((50, 50, 3), 255, dtype=np.uint8)
     cv2.imwrite(path, img)
     return path
