@@ -18,4 +18,7 @@ def test_read_image_valid(tmp_image_path):
     assert isinstance(img, np.ndarray)
     assert img.shape[0] > 0 and img.shape[1] > 0
       
-    
+def test_read_image_invalid(tmp_image_path):
+    p = Preprocessor()
+    with pytest.raises(FileNotFoundError):
+        p.read_image("non_existent_file.jpg")
