@@ -1,6 +1,10 @@
 import cv2
 import numpy as np
 
+class Preprocessor:
+    def __init__(self, resize_if_small=True):
+        self.resize_if_small= resize_if_small
+            
 def read_image(path):
     img = cv2.imread(path) #img = (height, width, channels)
     if img is None: #invalid oath
