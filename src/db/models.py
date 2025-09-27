@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Numeric
+from sqlalchemy import Column, Integer, String, Numeric, CheckConstraint
 from sqlalchemy.orm import declarative_base
 
 Base= declarative_base() 
@@ -20,6 +20,11 @@ class Products(Base):
 class Settings(Base):
     __tablename__ = "settings"
     
-    id= Column(Integer, primary_key=True, autoincrement=True)
+    id= Column(Integer, primary_key=True)
     currency= Column(String, unique=True, nullable=False)
     exchange_rate= Column(Numeric(10,2), nullable=False)
+    
+    __table_args__=(
+        #id only could be 1
+        CheckConstraint('id=1', name='only_one_row_check')
+    )
