@@ -12,3 +12,10 @@ def tmp_image_path():
     cv2.imwrite(path, img)
     return path
     
+def test_read_image_valid(tmp_image_path):
+    p= Preprocessor()
+    img = p.read_image(tmp_image_path) #completely white img's (height, width, channels)
+    assert isinstance(img, np.ndarray)
+    assert img.shape[0] > 0 and img.shape[1] > 0
+      
+    
