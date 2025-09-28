@@ -18,7 +18,7 @@ class DatabaseManager:
         Returns list of result dicts: {'product_id': ..., 'action': 'inserted'|'updated'|'skipped', 'reason': ...}
         """
         results= []
-        with self.Session() as session:
+        with get_session() as session:
             try: 
                 for p in products:
                     pid= str(p.get("ProductID")).strip()
@@ -74,16 +74,16 @@ class DatabaseManager:
     
     
     def get_all_products(self):
-        with self.Session() as session:
+        with get_session() as session:
             return session.query(Products).all()
         
     def get_product_by_id(self, product_id: str):
-        with self.Session() as session:
+        with get_session() as session:
             return session.query(Products).filter_by(product_id=product_id).one_or_none()
         
     def get_product_by_name(self, name: str):
         #fetch all products whose names contain text (case insensetive)
-        with self.Session() as session:
+        with get_session() as session:
             statement= select(Products).where(Products.name.ilike(f"%{name}%"))
             result= session.execute(statement).scalars().all()
             return result
