@@ -17,3 +17,11 @@ engine= create_engine(DB_URL, echo=False, future=True, connect_args=connect_args
 SessionLocal= sessionmaker(bind=engine, autoflush=False, expire_on_commit=False, future=True)
 
 Base = declarative_base()
+
+def init_db() -> None:
+    """
+        Generate tables based on models.
+        Caution: This built-in function imports models so that the model classes are registered on Base.
+    """
+    import src.db.models
+    Base.metadata.create_all(bind=engine)
