@@ -24,7 +24,7 @@ def temp_session(temp_engine):
 def test_get_session(temp_session): #creating in-memory temp db and session
     with get_session() as session:
         #this command does not require any tables, it is only used to test the connection and correct db performance
-        result = session.Execute("SELECT 1").scaler()
+        result = session.execute("SELECT 1").scalar()
         assert result == 1
     
 def test_init_db_creates_tables(temp_engine):
@@ -38,7 +38,7 @@ def test_init_db_creates_tables(temp_engine):
     assert "settings" in tables    
     
 def test_seed_settings(temp_session):
-    seed_settings()
+    seed_settings(session_arg=temp_session)
     #the table is empty, adding seed
     row= temp_session.query(Settings).first()
     assert row is not None
