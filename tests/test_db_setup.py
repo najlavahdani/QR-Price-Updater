@@ -4,6 +4,7 @@ from src.db.database import Base
 from sqlalchemy.orm import sessionmaker
 from src.db.database import get_session
 from sqlalchemy import inspect
+from src.db.database import init_db
 
 @pytest.fixture
 def temp_engine():
@@ -25,3 +26,12 @@ def test_get_session(temp_session): #creating in-memory temp db and session
         result = session.Execute("SELECT 1").scaler()
         assert result == 1
     
+def test_init_db_creates_tables(temp_engine):
+    # Test that init_db creates tables into temp db
+    init_db(engine_arg=temp_engine)
+    
+    #check that the tables has been created
+    inspector = inspect(temp_engine)
+    tables=inspector.get_table_names()
+    assert "products" in tables
+    assert "settings" in tables    
