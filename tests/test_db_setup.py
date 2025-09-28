@@ -6,6 +6,7 @@ from sqlalchemy import inspect
 from src.db.models import Settings
 from src.db.init_db import seed_settings
 from decimal import Decimal
+from sqlalchemy import text
 
 @pytest.fixture
 def temp_engine():
@@ -24,7 +25,7 @@ def temp_session(temp_engine):
 def test_get_session(temp_session): #creating in-memory temp db and session
     with get_session(temp_session) as session:
         #this command does not require any tables, it is only used to test the connection and correct db performance
-        result = session.execute("SELECT 1").scalar()
+        result = session.execute(text("SELECT 1")).scalar()
         assert result == 1
     
 def test_init_db_creates_tables(temp_engine):
