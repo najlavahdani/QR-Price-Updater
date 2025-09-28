@@ -11,6 +11,7 @@ from sqlalchemy import text
 @pytest.fixture
 def temp_engine():
     engine=create_engine("sqlite:///:memory:", echo=False, future=True)
+    init_db(engine_arg=engine)
     Base.metadata.create_all(engine)
     yield engine
     engine.dispose()
