@@ -24,5 +24,5 @@ class Settings(Base):
     
     __table_args__=(
         #id only could be 1
-        CheckConstraint('id=1', name='only_one_row_check')
+        CheckConstraint('id=1', name='only_one_row_check'),
     )
