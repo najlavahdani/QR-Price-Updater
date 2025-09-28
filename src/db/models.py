@@ -1,7 +1,5 @@
 from sqlalchemy import Column, Integer, String, Numeric, CheckConstraint
-from sqlalchemy.orm import declarative_base
-
-Base= declarative_base() 
+from src.db.database import Base 
 
 
 #products table
