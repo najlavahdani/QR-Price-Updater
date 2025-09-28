@@ -18,13 +18,14 @@ SessionLocal= sessionmaker(bind=engine, autoflush=False, expire_on_commit=False,
 
 Base = declarative_base()
 
-def init_db() -> None:
+def init_db(engine_arg=None) -> None:
     """
         Generate tables based on models.
         Caution: This built-in function imports models so that the model classes are registered on Base.
     """
-    import src.db.models
-    Base.metadata.create_all(bind=engine)
+    import src.db.models #register models
+    target_engine= engine_arg if engine_arg is not None else engine
+    Base.metadata.create_all(bind=target_engine)
     
 def get_engine():
     return engine
