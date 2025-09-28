@@ -73,15 +73,15 @@ class DatabaseManager:
         return results
     
     
-    def get_all_products(self):
+    def get_all_products(self) -> List[Products]:
         with get_session() as session:
             return session.query(Products).all()
         
-    def get_product_by_id(self, product_id: str):
+    def get_product_by_id(self, product_id: str) -> Products | None:
         with get_session() as session:
             return session.query(Products).filter_by(product_id=product_id).one_or_none()
         
-    def get_product_by_name(self, name: str):
+    def get_product_by_name(self, name: str) -> List[Products]:
         #fetch all products whose names contain text (case insensetive)
         with get_session() as session:
             statement= select(Products).where(Products.name.ilike(f"%{name}%"))
