@@ -56,7 +56,25 @@ def test_insert_update_product(db_manager, temp_session):
     prod_no_change = {"ProductID": "P101", "Name": "Laptop HP", "PriceUSD": "950.75"}
     no_change_result= db_manager.insert_or_update_products([prod_no_change], qr_gen, session=temp_session)
     assert no_change_result[0]["action"] == "skipped"
+    
 
+def teat_insert_single_product(db_manager, temp_session):
+    #single product
+    product= {"ProductID": "P500", "Name": "Webcam Logitech", "PriceUSD": "75.50"}
+    
+    #insert only 1 product
+    result= db_manager.insert_single_product(product, qr_gen, session=temp_session)
+    
+    #result check
+    assert result["action"] == "inserted"
+    assert result["product_id"] == "P500"
+
+    #database check
+    prod_in_db= db_manager.get_product_by_id("P500", session=temp_session)
+    assert prod_in_db is not None
+    assert prod_in_db.name == "Webcam Logitech"
+    assert prod_in_db.price == Decimal("75.50")
+    assert prod_in_db.qr_path ==  os.path.join(QR_TEST_DIR_IN_DBMANG, "P500.png")
 
 def test_get_product_by_id(db_manager, temp_session):
     product = {"ProductID": "P200", "Name": "Mouse Logitech", "PriceUSD": "25.99"}
