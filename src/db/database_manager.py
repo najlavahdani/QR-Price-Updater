@@ -59,11 +59,13 @@ class DatabaseManager:
                         new_product.qr_path= qr_gen_to_use.generate_qr(pid)
                         results.append({"product_id": pid, "action": "inserted"})
                 s.commit()
-            except Exception:
+            except Exception as e:
                 s.rollback()
-                raise
+                raise RuntimeError(f"DB insert faild: {e}")
         return results
     
+    def insert_single_product(self, product: dict, **kwargs) -> dict:
+        return self.insert_or_update_products([product], **kwargs)[0]
     
     def get_all_products(self, session: Session | None = None) -> List[Products]:
         with get_session(session) as s:
