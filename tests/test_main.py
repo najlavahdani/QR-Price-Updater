@@ -83,3 +83,12 @@ def test_product_page_rate_set(add_test_product_with_rate):
     
     app.dependency_overrides= {}
     
+
+def tets_product_page_not_found(temp_session):
+    app.dependency_overrides[get_session] = lambda: temp_session
+    
+    response = client.get("/product/UNKNOWN")
+    assert response.status_code == 404
+    assert "Product not found" in response.text
+    
+    app.dependency_overrides={}
