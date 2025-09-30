@@ -3,11 +3,13 @@ from fastapi.testclient import TestClient
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from decimal import Decimal
 
 from src.api.main import app
 from src.services.qrcode_generator import QRCodeGenerator
-from src.db.database import init_db
+from src.db.database import init_db, get_session
 from src.db.database_manager import DatabaseManager
+from src.services.exchange_rate import ExchangeRate
 #----------Test Client----------
 client= TestClient(app)
 
@@ -35,3 +37,11 @@ def db_manager():
     """database manager without default session"""
     return DatabaseManager(qr_base_url="http://127.0.0.1:8000")
 
+
+@pytest.fixture
+def add_test_product(temp_session, db_manager):
+    """test product, default exchange rate=-1"""
+    product={"ProductID":"T100", "Name":"Test Product without rate", "PriceUSD":"20"}
+    db_manager.insert_single_product(product, qr_gen, session=temp_session)
+    yield product, temp_session    
+    
