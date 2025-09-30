@@ -29,5 +29,9 @@ def temp_session():
     session.close()
     engine.dispose()
     
-
     
+@pytest.fixture
+def db_manager():
+    """database manager without default session"""
+    return DatabaseManager(qr_base_url="http://127.0.0.1:8000")
+
