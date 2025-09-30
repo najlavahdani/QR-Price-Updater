@@ -32,11 +32,11 @@ def product_page(
     
     #price calculating
     ex_rate= ExchangeRate(session=session)
-    try:
-        local_price = ex_rate.calculate_price(Decimal(str(usd_price= product.price)))
-        local_price_str=f"{local_price} تومان"
-    except Exception as e:
+    if ex_rate.get_rate() == Decimal(-1):
         local_price_str= "نرخ ارز تعریف نشده است"
+    else:
+        local_price=ex_rate.calculate_price(product.price)
+        local_price_str= f"{local_price} تومان"
         
     #render HTML template
     return templates.TemplateResponse(
