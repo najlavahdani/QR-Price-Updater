@@ -56,3 +56,18 @@ def add_test_product_with_rate(temp_session, db_manager):
     ex_rate.set_rate(rate=Decimal("42000"))
     
     yield product, temp_session
+    
+
+#----------test cases----------
+def test_product_page_rate_not_set(add_test_product):
+    product, session= add_test_product
+    #override session in fastAPI dependency
+    app.dependency_overrides[get_session] = lambda: session
+    
+    response= client.get(f"/product/{product['ProductID']}")
+    assert response.status_code == 200
+    assert product["Name"] in response.text
+    assert "نرخ ارز تعریف نشده" in response.text
+    
+    app.dependency_overrides={}
+    
