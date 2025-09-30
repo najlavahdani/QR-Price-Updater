@@ -70,4 +70,16 @@ def test_product_page_rate_not_set(add_test_product):
     assert "نرخ ارز تعریف نشده" in response.text
     
     app.dependency_overrides={}
+
+
+def test_product_page_rate_set(add_test_product_with_rate):
+    product, session= add_test_product_with_rate
+    app.dependency_overrides[get_session] = lambda: session
+    
+    response= client.get(f"/product/{product['ProductId']}")
+    assert response.status_code == 200
+    assert product["Name"] in response.text
+    assert "تومان" in response.text
+    
+    app.dependency_overrides= {}
     
