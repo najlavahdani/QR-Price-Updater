@@ -45,3 +45,14 @@ def add_test_product(temp_session, db_manager):
     db_manager.insert_single_product(product, qr_gen, session=temp_session)
     yield product, temp_session    
     
+
+@pytest.fixture
+def add_test_product_with_rate(temp_session, db_manager):
+    product={"ProductID":"T101", "Name":"Product With Rate", "PriceUSD":"20"}
+    db_manager.insert_single_product(product, qr_gen, session=temp_session)
+    
+    #set exchange rate
+    ex_rate=ExchangeRate(session=temp_session)
+    ex_rate.set_rate(rate=Decimal("42000"))
+    
+    yield product, temp_session
