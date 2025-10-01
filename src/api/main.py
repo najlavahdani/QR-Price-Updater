@@ -39,11 +39,17 @@ def product_page(
         local_price_str= f"{local_price} تومان"
         
     #render HTML template
+    
+    product_dict = {
+        "ProductID": product.ProductID,
+        "Name": product.Name, 
+        "PriceUSD": product.PriceUSD
+    }
     return templates.TemplateResponse(
         "product.html",
         {
             "request": request,
-            "product": product,
+            "product": product_dict,
             "local_price": local_price_str,
         }
     )
