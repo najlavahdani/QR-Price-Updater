@@ -62,7 +62,10 @@ def add_test_product_with_rate(temp_session, db_manager):
 def test_product_page_rate_not_set(add_test_product):
     product, session= add_test_product
     #override session in fastAPI dependency
-    app.dependency_overrides[get_session] = lambda: session
+    def override_get_session():
+        yield session
+        
+    app.dependency_overrides[get_session] = override_get_session
     
     response= client.get(f"/product/{product['ProductID']}")
     assert response.status_code == 200
@@ -74,9 +77,14 @@ def test_product_page_rate_not_set(add_test_product):
 
 def test_product_page_rate_set(add_test_product_with_rate):
     product, session= add_test_product_with_rate
-    app.dependency_overrides[get_session] = lambda: session
     
-    response= client.get(f"/product/{product['ProductId']}")
+    def override_get_session():
+        yield session
+        
+    app.dependency_overrides[get_session] = override_get_session
+    
+    
+    response= client.get(f"/product/{product['ProductID']}")
     assert response.status_code == 200
     assert product["Name"] in response.text
     assert "تومان" in response.text
@@ -84,8 +92,12 @@ def test_product_page_rate_set(add_test_product_with_rate):
     app.dependency_overrides= {}
     
 
-def tets_product_page_not_found(temp_session):
-    app.dependency_overrides[get_session] = lambda: temp_session
+def tests_product_page_not_found(temp_session):
+    def override_get_session():
+        yield temp_session
+        
+    app.dependency_overrides[get_session] = override_get_session
+    
     
     response = client.get("/product/UNKNOWN")
     assert response.status_code == 404
