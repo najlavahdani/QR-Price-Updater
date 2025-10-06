@@ -4,8 +4,9 @@ from fastapi.responses import HTMLResponse
 from pathlib import Path
 from sqlalchemy.orm import Session
 from decimal import Decimal
-
+from typing import Annotated, Any
 from src.db.database import get_session
+
 from src.db.database_manager import DatabaseManager
 from src.services.exchange_rate import ExchangeRate
 
@@ -23,7 +24,8 @@ app= FastAPI(title="Product QR Service")
 def product_page(
     request: Request,
     product_id: str,
-    session: Session = Depends(get_session)
+    # session: Session = Depends(get_session),
+    session: Annotated[Session, Depends(get_session)]
 ):
     #retrieving product
     product= db.get_product_by_id(product_id= product_id, session=session)
