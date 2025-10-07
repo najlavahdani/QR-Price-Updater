@@ -24,4 +24,15 @@ class ProductQRApp:
         self.create_tab_import()
         
     
-    
+    #----------Tab1: import excel----------
+    def create_tab_import(self):
+        tab_import = ttk.Frame(self.notebook)
+        self.notebook.add(tab_import, text="ورود اکسل")
+        
+        tk.Label(tab_import, text="برای ورود گروهی محصولات، فایل اکسل را آپلود کنید:").pack(pady=10)
+        self.entry_file = tk.Entry(tab_import, width=60)
+        self.entry_file.pack(pady=5)
+        
+        tk.Button(tab_import, text="انتخاب فایل", command=self.choose_file).pack(pady=5)
+        tk.Button(tab_import, text="وارد کردن", command=self.import_excel).pack(pady=10)
+        
