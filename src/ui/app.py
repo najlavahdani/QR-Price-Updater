@@ -232,7 +232,31 @@ class ProductQRApp:
         except Exception as e:
             messagebox.showerror("خطا", f"خطا در درج محصول:\n{e}")
 
-    
+    #------pdf download handler-----
+    def download_single_qr_pdf(self):
+        """Download PDF for the single inserted product QR code."""
+        if not getattr(self, "recent_qr_items", None):
+            messagebox.showwarning("هشدار", "کد QR محصول جدیدی برای دانلود وجود ندارد.")
+            return
+
+        save_path = filedialog.asksaveasfilename(
+            title="ذخیره PDF کد QR محصول",
+            defaultextension=".pdf",
+            filetypes=[("PDF files", "*.pdf")],
+            initialfile=f"{self.recent_qr_items[0]['product_id']}_QR.pdf"
+        )
+
+        if not save_path:
+            messagebox.showinfo("لغو شد", "عملیات ذخیره‌سازی لغو شد.")
+            return
+
+        try:
+            from src.utils.pdf_utils import create_qr_pdf
+            create_qr_pdf(self.recent_qr_items, save_path, title="QR کد محصول")
+            messagebox.showinfo("موفقیت", f"PDF با موفقیت ذخیره شد:\n{save_path}")
+        except Exception as e:
+            messagebox.showerror("خطا در ساخت PDF", f"خطا در ساخت PDF:\n{e}")
+
 # ----------------- Run the app -----------------
 if __name__ == "__main__":
     root = tk.Tk()
