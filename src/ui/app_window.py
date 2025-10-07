@@ -26,5 +26,24 @@ tk.Button(tab_import, text="انتخاب فایل", command=choose_file).pack(pa
 tk.Button(tab_import, text="وارد کردن").pack(pady=10)
 
 
+#----------Tab2-----------
+tab_add= ttk.Frame(notebook)
+notebook.add(tab_add, text="درج محصول")
+
+tk.Label(tab_add, text="شناسه محصول").grid(row=0, column=0, padx=10, pady=10, sticky="e")
+entry_id= tk.Entry(tab_add, width=40)
+entry_id.grid(row=0, column=1, pady=10)
+
+tk.Label(tab_add, text="نام محصول").grid(row=1, column=0, padx=10, pady=10, sticky="e")
+entry_id= tk.Entry(tab_add, width=40)
+entry_id.grid(row=1, column=1, pady=10)
+
+tk.Label(tab_add, text="قیمت محصول").grid(row=2, column=0, padx=10, pady=10, sticky="e")
+entry_id= tk.Entry(tab_add, width=40)
+entry_id.grid(row=2, column=1, pady=10)
+
+tk.Button(tab_add, text="درج کردن").grid(row=3, column=0, columnspan=2, pady=10)
+
 #run the window
 root.mainloop()
+
