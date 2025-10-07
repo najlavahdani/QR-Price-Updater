@@ -2,7 +2,7 @@ import os
 import qrcode
 
 class QRCodeGenerator:
-    def __init__(self, base_url: str, png_files_dir: str= None): 
+    def __init__(self, base_url: str, png_files_dir: str= "C:\\Users\\Najla\\Desktop\\QR price updater\\assets\\MainQRCodes"): 
         self.base_url= base_url
         
         if png_files_dir:
