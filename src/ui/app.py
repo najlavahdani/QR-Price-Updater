@@ -180,7 +180,59 @@ class ProductQRApp:
         self.download_single_pdf_btn.grid(row=4, column=0, columnspan=2, pady=10)
 
 
+    #-----handler-----
+    def insert_single_product_ui(self):
+        """Insert single product from entries and generate QR."""
+        pid = self.entry_single_id.get().strip()
+        name = self.entry_single_name.get().strip()
+        price = self.entry_single_price.get().strip()
 
+        if not pid or not name or not price:
+            messagebox.showwarning("هشدار", "لطفاً تمام فیلدها را پر کنید.")
+            return
+
+        # validate price
+        from decimal import Decimal
+        try:
+            price_decimal = Decimal(price)
+        except Exception:
+            messagebox.showerror("خطا", "قیمت محصول نامعتبر است.")
+            return
+
+        product = {
+            "ProductID": pid,
+            "Name": name,
+            "PriceUSD": price_decimal
+        }
+
+        try:
+            result = self.db_manager.insert_single_product(product, qrcode_generator=self.qr_gen)
+
+            action = result.get("action")
+            reason = result.get("reason", "")
+
+            messagebox.showinfo(
+                "نتیجه درج محصول",
+                f"وضعیت: {action}\n{reason}"
+            )
+
+            # Track QR code path if inserted
+            qr_dir = os.path.abspath("assets/MainQRCodes")
+            qr_path = os.path.join(qr_dir, f"{pid}.png")
+            if action == "inserted" and os.path.exists(qr_path):
+                self.recent_qr_items = [{
+                    "image_path": qr_path,
+                    "product_id": pid,
+                    "product_name": name
+                }]
+                self.download_single_pdf_btn.config(state="normal")
+            else:
+                self.download_single_pdf_btn.config(state="disabled")
+
+        except Exception as e:
+            messagebox.showerror("خطا", f"خطا در درج محصول:\n{e}")
+
+    
 # ----------------- Run the app -----------------
 if __name__ == "__main__":
     root = tk.Tk()
