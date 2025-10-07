@@ -36,3 +36,11 @@ class ProductQRApp:
         tk.Button(tab_import, text="انتخاب فایل", command=self.choose_file).pack(pady=5)
         tk.Button(tab_import, text="وارد کردن", command=self.import_excel).pack(pady=10)
         
+    #-----helper funcs-----
+    # File chooser button
+    def choose_file(self):
+        filename = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx *.xls")])
+        self.entry_file.delete(0, tk.END)
+        self.entry_file.insert(0, filename)
+        
+   
