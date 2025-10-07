@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base, Session as SessionType
 from typing import Generator
 from contextlib import contextmanager
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session 
 
 #paths
 BASE_DIR= Path(__file__).resolve().parents[1] #src/
@@ -34,19 +34,13 @@ def get_engine():
     return engine
 
 @contextmanager
-def get_session(session_arg: Session=None) -> Generator[SessionType, None, None]:
+def get_session() -> Generator[Session, None, None]:
     """
         Dependency for FastAPI or anywhere else.
         Use in route: session: Session = Depends(get_session)
     """
-    close_session= False
-    if session_arg is not None:
-        session = session_arg
-    else:
-        session = SessionLocal()
-        close_session = True
+    db = SessionLocal()
     try:
-        yield session
+        yield db
     finally:
-        if close_session:
-            session.close()
+        db.close()
