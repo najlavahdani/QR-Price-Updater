@@ -27,7 +27,8 @@ class ProductQRApp:
 
         # Tab 1: Import Excel
         self.create_tab_import()
-       
+        # inside __init__ after self.create_tab_import()
+        self.create_tab_add()
 
     # ---------- Tab 1: Import Excel ----------
     def create_tab_import(self):
