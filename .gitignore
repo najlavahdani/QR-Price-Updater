@@ -39,3 +39,5 @@ Thumbs.db
 .pytest_cache
 
 tests_outputs
+
+tets_qrcodes
