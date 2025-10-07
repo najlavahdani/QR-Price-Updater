@@ -72,3 +72,10 @@ class ProductQRApp:
             
 
 
+
+
+# ----------------- Run the app -----------------
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = ProductQRApp(root)
+    root.mainloop()
