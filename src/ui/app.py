@@ -112,7 +112,40 @@ class ProductQRApp:
         except Exception as e:
             messagebox.showerror("خطا", f"خطا در وارد کردن فایل اکسل:\n{e}")
 
-   
+    def download_qr_pdf(self):
+        """Combine recent QR codes into a single PDF and let the user save it."""
+        if not getattr(self, "recent_qr_items", None):
+            messagebox.showwarning("هشدار", "کد QR جدیدی برای دانلود وجود ندارد.")
+            return
+
+        save_path = filedialog.asksaveasfilename(
+            title="ذخیره PDF کدهای QR",
+            defaultextension=".pdf",
+            filetypes=[("PDF files", "*.pdf")],
+            initialfile="QRCodes.pdf"
+        )
+
+        if not save_path:
+            messagebox.showinfo("لغو شد", "عملیات ذخیره‌سازی لغو شد.")
+            return
+
+        try:
+            # try to create PDF; pdf_utils will auto-find a TTF font if available
+            # you can also pass font_path=r"C:\Windows\Fonts\Tahoma.ttf" explicitly
+            create_qr_pdf(self.recent_qr_items, save_path, title="فهرست QR کدها")
+            messagebox.showinfo("موفقیت", f"PDF با موفقیت ذخیره شد:\n{save_path}")
+        except RuntimeError as re:
+            # likely missing font — show clear instructions
+            messagebox.showerror(
+                "خطا در ساخت PDF",
+                f"{re}\n\nبرای نمایش فارسی باید یک فونت TTF یونیکد مثل 'Tahoma' یا 'DejaVuSans' داشته باشید.\n"
+                "می‌توانید آن را در پوشه پروژه کپی کنید یا مسیر کامل آن را به تابع بدهید.\n"
+                "همچنین نصب پکیج‌های 'arabic-reshaper' و 'python-bidi' برای نمایش صحیح فارسی توصیه می‌شود:\n"
+                "pip install arabic-reshaper python-bidi"
+            )
+        except Exception as e:
+            messagebox.showerror("خطا در ساخت PDF", f"خطای غیرمنتظره هنگام ساخت PDF:\n{e}")
+
 
 # ----------------- Run the app -----------------
 if __name__ == "__main__":
