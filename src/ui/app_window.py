@@ -27,6 +27,7 @@ tk.Button(tab_import, text="وارد کردن").pack(pady=10)
 
 
 #----------Tab2-----------
+#insert single product
 tab_add= ttk.Frame(notebook)
 notebook.add(tab_add, text="درج محصول")
 
@@ -43,6 +44,24 @@ entry_id= tk.Entry(tab_add, width=40)
 entry_id.grid(row=2, column=1, pady=10)
 
 tk.Button(tab_add, text="درج کردن").grid(row=3, column=0, columnspan=2, pady=10)
+
+
+#----------Tab3----------
+#search product
+tab_search=ttk.Frame(notebook)
+notebook.add(tab_search, text="جستجوی محصول")
+
+tk.Label(tab_search, text="نام یا شناسه محصول را وارد کنید").pack(pady=10)
+entry_search = tk.Entry(tab_search, width=50)
+entry_search.pack(pady=5)
+tk.Button(tab_search, text="جستجو").pack(pady=5)
+
+#search result table
+tree_search = ttk.Treeview(tab_search, columns=("ProductID", "Name", "PriceUSD"), show='headings')
+tree_search.heading("ProductID", text="شناسه محصول")
+tree_search.heading("Name", text="نام محصول")
+tree_search.heading("PriceUSD", text="قیمت")
+tree_search.pack(expand=True, fill='both', pady=10)
 
 #run the window
 root.mainloop()
