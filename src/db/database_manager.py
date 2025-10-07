@@ -64,8 +64,8 @@ class DatabaseManager:
                 raise RuntimeError(f"DB insert faild: {e}")
         return results
     
-    def insert_single_product(self, product: dict, **kwargs) -> dict:
-        return self.insert_or_update_products([product], **kwargs)[0]
+    def insert_single_product(self, product: dict,*args,**kwargs) -> dict:
+        return self.insert_or_update_products([product],*args ,**kwargs)[0]
     
     def get_all_products(self, session: Session | None = None) -> List[Products]:
         with get_session(session) as s:
@@ -81,3 +81,5 @@ class DatabaseManager:
             statement= select(Products).where(Products.name.ilike(f"%{name}%"))
             result= s.execute(statement).scalars().all()
             return result
+        
+        
