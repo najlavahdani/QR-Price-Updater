@@ -27,6 +27,7 @@ class ProductQRApp:
 
         # Tab 1: Import Excel
         self.create_tab_import()
+       
 
     # ---------- Tab 1: Import Excel ----------
     def create_tab_import(self):
@@ -142,6 +143,41 @@ class ProductQRApp:
             )
         except Exception as e:
             messagebox.showerror("خطا در ساخت PDF", f"خطای غیرمنتظره هنگام ساخت PDF:\n{e}")
+
+
+
+    #----------Tab2: Insert single product----------
+    def create_tab_add(self):
+        tab_add = ttk.Frame(self.notebook)
+        self.notebook.add(tab_add, text="درج محصول")
+
+        # Labels & Entries
+        tk.Label(tab_add, text="شناسه محصول").grid(row=0, column=0, padx=10, pady=10, sticky="e")
+        self.entry_single_id = tk.Entry(tab_add, width=40)
+        self.entry_single_id.grid(row=0, column=1, pady=10)
+
+        tk.Label(tab_add, text="نام محصول").grid(row=1, column=0, padx=10, pady=10, sticky="e")
+        self.entry_single_name = tk.Entry(tab_add, width=40)
+        self.entry_single_name.grid(row=1, column=1, pady=10)
+
+        tk.Label(tab_add, text="قیمت محصول").grid(row=2, column=0, padx=10, pady=10, sticky="e")
+        self.entry_single_price = tk.Entry(tab_add, width=40)
+        self.entry_single_price.grid(row=2, column=1, pady=10)
+
+        # Insert button
+        tk.Button(tab_add, text="درج کردن", command=self.insert_single_product_ui).grid(
+            row=3, column=0, columnspan=2, pady=15
+        )
+
+        # PDF download button (disabled initially)
+        self.download_single_pdf_btn = tk.Button(
+            tab_add,
+            text="دانلود PDF کد QR محصول",
+            command=self.download_single_qr_pdf,
+            state="disabled"
+        )
+        self.download_single_pdf_btn.grid(row=4, column=0, columnspan=2, pady=10)
+
 
 
 # ----------------- Run the app -----------------
