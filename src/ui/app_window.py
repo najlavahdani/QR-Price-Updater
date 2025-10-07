@@ -63,6 +63,16 @@ tree_search.heading("Name", text="نام محصول")
 tree_search.heading("PriceUSD", text="قیمت")
 tree_search.pack(expand=True, fill='both', pady=10)
 
+
+#-----------Tab4-----------
+tab_update_currency = ttk.Frame(notebook)
+notebook.add(tab_update_currency, text="بروزرسانی نرخ")
+
+tk.Label(tab_update_currency, text="نرخ ارز جدید").pack(pady=10)
+entry_currency = tk.Entry(tab_update_currency, width=20)
+entry_currency.pack(pady=5)
+tk.Button(tab_update_currency, text="بروزرسانی").pack(pady=10)
+
 #run the window
 root.mainloop()
 
