@@ -43,4 +43,32 @@ class ProductQRApp:
         self.entry_file.delete(0, tk.END)
         self.entry_file.insert(0, filename)
         
-   
+    # Import Excel button
+    def import_excel(self):
+        file_path = self.entry_file.get()
+        if not file_path:
+            messagebox.showwarning("Warning", "لطفاً یک فایل اکسل انتخاب کنید.")
+            return
+
+        try:
+            # Step 1: Load and validate products from Excel
+            products_list = load_products_from_excel(file_path)
+
+            # Step 2: Insert or update products in DB (with QR code generation)
+            results = self.db_manager.insert_or_update_products(products_list, qrcode_generator=self.qr_gen)
+
+            # Step 3: Show summary
+            inserted = sum(1 for r in results if r["action"] == "inserted")
+            updated = sum(1 for r in results if r["action"] == "updated")
+            skipped = sum(1 for r in results if r["action"] == "skipped")
+
+            messagebox.showinfo(
+                "Import Results",
+                f"محصولات وارد شده: {inserted}\nمحصولات بروزرسانی شده: {updated}\nمحصولات نادیده گرفته شده: {skipped}"
+            )
+
+        except Exception as e:
+            messagebox.showerror("Error", f"خطا در وارد کردن فایل اکسل:\n{e}")
+            
+
+
