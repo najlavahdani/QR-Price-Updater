@@ -138,10 +138,7 @@ class ProductQRApp:
             # likely missing font — show clear instructions
             messagebox.showerror(
                 "خطا در ساخت PDF",
-                f"{re}\n\nبرای نمایش فارسی باید یک فونت TTF یونیکد مثل 'Tahoma' یا 'DejaVuSans' داشته باشید.\n"
-                "می‌توانید آن را در پوشه پروژه کپی کنید یا مسیر کامل آن را به تابع بدهید.\n"
-                "همچنین نصب پکیج‌های 'arabic-reshaper' و 'python-bidi' برای نمایش صحیح فارسی توصیه می‌شود:\n"
-                "pip install arabic-reshaper python-bidi"
+                "فونت سیستم فارسی را ساپورت نمیکند. tahoma.ttf را دانلود کرده و درمسیر C:\Windows\Fonts\Tahoma.ttf قرار دهید."
             )
         except Exception as e:
             messagebox.showerror("خطا در ساخت PDF", f"خطای غیرمنتظره هنگام ساخت PDF:\n{e}")
