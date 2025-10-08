@@ -842,6 +842,23 @@ class ProductQRApp:
 
         entry.bind("<Return>", save_edit)
         entry.bind("<FocusOut>", lambda e: entry.destroy())
+        
+    
+    def save_all_table_changes(self):
+        """Save edited product values to the database."""
+        if not self.edited_cells_all:
+            messagebox.showinfo("اطلاع", "هیچ تغییری برای ذخیره وجود ندارد.")
+            return
+
+        try:
+            for row_id, values in self.edited_cells_all.items():
+                pid, name, price = values
+                product = {"ProductID": pid, "Name": name, "PriceUSD": Decimal(price)}
+                self.db_manager.insert_single_product(product, qrcode_generator=self.qr_gen)
+            messagebox.showinfo("موفقیت", "تغییرات با موفقیت ذخیره شد.")
+            self.edited_cells_all.clear()
+        except Exception as e:
+            messagebox.showerror("خطا در ذخیره", f"خطا در بروزرسانی محصولات:\n{e}")
 
 
 # ----------------- Run the app -----------------
