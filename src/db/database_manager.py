@@ -82,4 +82,16 @@ class DatabaseManager:
             result= s.execute(statement).scalars().all()
             return result
         
+    def delete_product(self, product_id: str):
+        """
+        Delete a product from the database by its ProductID.
+        """
+        with get_session() as s:
+            product = s.query(Products).filter_by(product_id=product_id).first()
+            if not product:
+                raise ValueError(f"Product with ID {product_id} not found.")
+            s.delete(product)
+            s.commit()
+            return {"status": "deleted", "product_id": product_id}
+        
         
