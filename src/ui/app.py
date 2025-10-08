@@ -770,6 +770,38 @@ class ProductQRApp:
         except Exception as e:
             messagebox.showerror("خطا", f"خطا در بروزرسانی نرخ:\n{e}")
 
+# ----------------- Tab 5: View All Products -----------------
+    def create_tab_list_all(self):
+        tab_list = ttk.Frame(self.notebook)
+        self.notebook.add(tab_list, text="لیست محصولات")
+
+        # --- Top Action Buttons ---
+        btn_frame = ttk.Frame(tab_list)
+        btn_frame.pack(pady=10)
+
+        tk.Button(btn_frame, text="بروزرسانی لیست", command=self.load_all_products).grid(row=0, column=0, padx=5)
+        tk.Button(btn_frame, text="ذخیره تغییرات", command=self.save_all_table_changes).grid(row=0, column=1, padx=5)
+        tk.Button(btn_frame, text="حذف محصول", command=self.delete_selected_product).grid(row=0, column=2, padx=5)
+        tk.Button(btn_frame, text="دانلود QR PDF", command=self.download_selected_qr_pdf_all).grid(row=0, column=3, padx=5)
+
+        # --- Product Table ---
+        columns = ("ProductID", "Name", "PriceUSD")
+        self.tree_list_all = ttk.Treeview(tab_list, columns=columns, show="headings", height=20)
+
+        for col, text in zip(columns, ["شناسه", "نام محصول", "قیمت (دلار)"]):
+            self.tree_list_all.heading(col, text=text)
+            self.tree_list_all.column(col, width=200, anchor="center")
+
+        self.tree_list_all.pack(expand=True, fill="both", pady=10)
+
+        # Bind editing
+        self.tree_list_all.bind("<Double-1>", self.on_cell_double_click_all)
+
+        # Track edits
+        self.edited_cells_all = {}
+
+        # Load data initially
+        self.load_all_products()
 
 # ----------------- Run the app -----------------
 if __name__ == "__main__":
