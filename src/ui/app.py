@@ -784,6 +784,7 @@ class ProductQRApp:
         tk.Button(btn_frame, text="ذخیره تغییرات", command=self.save_all_table_changes).grid(row=0, column=1, padx=5)
         tk.Button(btn_frame, text="حذف محصول", command=self.delete_selected_product).grid(row=0, column=2, padx=5)
         tk.Button(btn_frame, text="دانلود QR PDF", command=self.download_selected_qr_pdf).grid(row=0, column=3, padx=5)
+        tk.Button(tab_list, text="دانلود QR همه محصولات", command=self.download_all_qr_pdf).pack(pady=5)
 
         # --- Product Table ---
         columns = ("ProductID", "Name", "PriceUSD")
@@ -913,6 +914,38 @@ class ProductQRApp:
             messagebox.showinfo("موفقیت", f"PDF با موفقیت ذخیره شد:\n{save_path}")
         except Exception as e:
             messagebox.showerror("خطا در ساخت PDF", f"خطا در ساخت PDF:\n{e}")
+    
+    # ----------------- Method to download all QR codes -----------------
+    def download_all_qr_pdf(self):
+        try:
+            products = self.db_manager.get_all_products()  # fetch all products
+            qr_items = []
+            for p in products:
+                if p.qr_path and os.path.exists(p.qr_path):
+                    qr_items.append({
+                        "image_path": p.qr_path,
+                        "product_id": p.product_id,
+                        "product_name": p.name
+                    })
+
+            if not qr_items:
+                messagebox.showwarning("هشدار", "هیچ QR کدی برای دانلود وجود ندارد.")
+                return
+
+            save_path = filedialog.asksaveasfilename(
+                title="ذخیره PDF QR همه محصولات",
+                defaultextension=".pdf",
+                filetypes=[("PDF files", "*.pdf")],
+                initialfile="AllProducts_QR.pdf"
+            )
+            if not save_path:
+                return
+
+            create_qr_pdf(qr_items, save_path, title="QR همه محصولات")
+            messagebox.showinfo("موفقیت", f"PDF با موفقیت ذخیره شد:\n{save_path}")
+
+        except Exception as e:
+            messagebox.showerror("خطا", f"خطا در ساخت PDF:\n{e}")
 
 
 # ----------------- Run the app -----------------
