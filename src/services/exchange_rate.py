@@ -4,15 +4,16 @@ from src.db.models import Settings
 from src.db.database import get_session
 
 class ExchangeRate:
-    def __init__(self, session: Session|None=None):
+    def __init__(self):
         #If session is not given, get_session is used in each method.
-        self.external_session = session
+        # self.external_session = session
+        pass
         
     
-    def set_rate(self, rate: Decimal):
+    def set_rate(self, rate: Decimal, session: Session|None=None):
         #If we have an external session, we use that, otherwise get_session opens and closes itself.
-        if self.external_session:
-            s= self.external_session
+        if session:
+            s= session
             setting = s.query(Settings).first() #get first record
                 
             if setting: #true if first record exist
@@ -33,10 +34,10 @@ class ExchangeRate:
                 s.commit()
                 return setting
     
-    def get_rate(self) -> Decimal:
+    def get_rate(self, session: Session|None=None) -> Decimal:
         #Returns the exchange rate value of the first Settings record.
-        if self.external_session:
-            s=self.external_session
+        if session:
+            s=session
             setting=s.query(Settings).first()
         else:
             with get_session() as s:
