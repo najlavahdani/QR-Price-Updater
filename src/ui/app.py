@@ -802,6 +802,17 @@ class ProductQRApp:
 
         # Load data initially
         self.load_all_products()
+    
+    def load_all_products(self):
+        """Fetch all products from DB and show them in the table."""
+        try:
+            products = self.db_manager.get_all_products()
+            for i in self.tree_list_all.get_children():
+                self.tree_list_all.delete(i)
+            for p in products:
+                self.tree_list_all.insert("", tk.END, values=(p.product_id, p.name, str(p.price)))
+        except Exception as e:
+            messagebox.showerror("خطا", f"خطا در بارگذاری محصولات:\n{e}")
 
 # ----------------- Run the app -----------------
 if __name__ == "__main__":
