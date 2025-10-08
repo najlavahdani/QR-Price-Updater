@@ -382,6 +382,7 @@ class ProductQRApp:
         self.create_tab_add()
         self.create_tab_manage()
         self.create_tab_update_currency()
+        self.create_tab_list_all()
 
     # ----------------- Tab 1: Import Excel -----------------
     def create_tab_import(self):
