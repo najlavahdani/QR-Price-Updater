@@ -221,9 +221,9 @@ class ProductQRApp:
         tk.Button(search_frame, text="جستجو", command=self.search_products_manage).grid(row=0, column=3, padx=5)
 
         # Treeview Table
-        columns = ("ProductID", "Name", "PriceUSD", "QR")
+        columns = ("ProductID", "Name", "PriceUSD")
         self.tree_manage = ttk.Treeview(tab_manage, columns=columns, show="headings", height=15)
-        for col, text in zip(columns, ["شناسه", "نام محصول", "قیمت", "QR کد"]):
+        for col, text in zip(columns, ["شناسه", "نام محصول", "قیمت"]):
             self.tree_manage.heading(col, text=text)
             self.tree_manage.column(col, width=150, anchor="center")
         self.tree_manage.pack(expand=True, fill="both", pady=10)
