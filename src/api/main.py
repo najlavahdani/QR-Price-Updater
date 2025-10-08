@@ -24,28 +24,37 @@ app= FastAPI(title="Product QR Service")
 def product_page(
     request: Request,
     product_id: str,
-    # session: Session = Depends(get_session),
-    session: Annotated[Session, Depends(get_session)]
+    session: Session = Depends(get_session),
+    # session: Annotated[Session, Depends(get_session)]
 ):
+    # unwrap generator if necessary
+    if hasattr(session, "__next__"):
+        session = next(session)
+
     #retrieving product
     product= db.get_product_by_id(product_id= product_id, session=session)
     if not product:
         raise HTTPException(status_code=404, detail=" Product not found")
     
     #price calculating
-    ex_rate= ExchangeRate(session=session)
-    if ex_rate.get_rate() == Decimal(-1):
-        local_price_str= "نرخ ارز تعریف نشده است"
-    else:
-        local_price=ex_rate.calculate_price(product.price)
-        local_price_str= f"{local_price} تومان"
+    # ex_rate= ExchangeRate(session=session)
+    # if ex_rate.get_rate() == Decimal(-1):
+    #     local_price_str= "نرخ ارز تعریف نشده است"
+    # else:
+    #     local_price=ex_rate.calculate_price(product.price)
+    #     local_price_str= f"{local_price} تومان"
+    ex_rate = ExchangeRate()  # pass the real session here
+    try:
+        local_price_str = f"{ex_rate.calculate_price(product.price)} تومان"
+    except ValueError:
+        local_price_str = "نرخ ارز تعریف نشده است"   
         
     #render HTML template
     
     product_dict = {
-        "ProductID": product.ProductID,
-        "Name": product.Name, 
-        "PriceUSD": product.PriceUSD
+        "ProductID": product.product_id,
+        "Name": product.name, 
+        "PriceUSD": product.price
     }
     return templates.TemplateResponse(
         "product.html",
