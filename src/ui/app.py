@@ -859,6 +859,27 @@ class ProductQRApp:
             self.edited_cells_all.clear()
         except Exception as e:
             messagebox.showerror("خطا در ذخیره", f"خطا در بروزرسانی محصولات:\n{e}")
+            
+    def delete_selected_product(self):
+        """Delete selected product from DB and table."""
+        selected = self.tree_list_all.selection()
+        if not selected:
+            messagebox.showwarning("هشدار", "هیچ محصولی انتخاب نشده است.")
+            return
+
+        item = self.tree_list_all.item(selected[0])
+        product_id = item["values"][0]
+
+        confirm = messagebox.askyesno("تأیید حذف", f"آیا از حذف محصول {product_id} مطمئن هستید؟")
+        if not confirm:
+            return
+
+        try:
+            self.db_manager.delete_product(product_id)
+            self.tree_list_all.delete(selected[0])
+            messagebox.showinfo("موفقیت", f"محصول {product_id} حذف شد.")
+        except Exception as e:
+            messagebox.showerror("خطا در حذف", f"خطا در حذف محصول:\n{e}")
 
 
 # ----------------- Run the app -----------------
