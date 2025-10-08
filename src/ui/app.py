@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import os
+from decimal import Decimal
 
 from src.utils.data_loader import load_products_from_excel
 from src.db.database_manager import DatabaseManager
@@ -12,25 +13,25 @@ class ProductQRApp:
     def __init__(self, root):
         self.root = root
         self.root.title("مدیر کد QR محصولات")
-        self.root.geometry("800x600")
+        self.root.geometry("900x650")
 
         # Initialize DB manager and QR generator
         self.db_manager = DatabaseManager(qr_base_url="http://QRApp.com")
         self.qr_gen = QRCodeGenerator(base_url="http://QRApp.com")
 
-        # Track recently generated QR items (image + name + id)
         self.recent_qr_items = []
+        self.edited_cells = {}
 
         # Create notebook for tabs
         self.notebook = ttk.Notebook(root)
-        self.notebook.pack(expand=True, fill='both')
+        self.notebook.pack(expand=True, fill="both")
 
-        # Tab 1: Import Excel
+        # Initialize tabs
         self.create_tab_import()
-        # inside __init__ after self.create_tab_import()
         self.create_tab_add()
+        self.create_tab_manage()
 
-    # ---------- Tab 1: Import Excel ----------
+    # ----------------- Tab 1: Import Excel -----------------
     def create_tab_import(self):
         tab_import = ttk.Frame(self.notebook)
         self.notebook.add(tab_import, text="ورود اکسل")
@@ -42,80 +43,61 @@ class ProductQRApp:
         tk.Button(tab_import, text="انتخاب فایل", command=self.choose_file).pack(pady=5)
         tk.Button(tab_import, text="وارد کردن", command=self.import_excel).pack(pady=10)
 
-        # Add Download PDF button (disabled initially)
         self.download_pdf_btn = tk.Button(
             tab_import,
             text="دانلود PDF کدهای QR",
             command=self.download_qr_pdf,
-            state="disabled"
+            state="disabled",
         )
         self.download_pdf_btn.pack(pady=10)
 
-    # ----- Helper Functions -----
     def choose_file(self):
-        """Open file dialog to choose Excel file."""
         filename = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx *.xls")])
         self.entry_file.delete(0, tk.END)
         self.entry_file.insert(0, filename)
 
     def import_excel(self):
-        """Load Excel file, validate, insert/update DB, and generate QR codes."""
         file_path = self.entry_file.get()
         if not file_path:
             messagebox.showwarning("هشدار", "لطفاً یک فایل اکسل انتخاب کنید.")
             return
 
         try:
-            # Step 1: Load and validate products from Excel
             products_list = load_products_from_excel(file_path)
-
-            # Step 2: Insert or update products in DB (with QR code generation)
             results = self.db_manager.insert_or_update_products(
-                products_list,
-                qrcode_generator=self.qr_gen
+                products_list, qrcode_generator=self.qr_gen
             )
 
-            # Step 3: Collect new QR code paths
             new_qr_dir = os.path.abspath("assets/MainQRCodes")
-            self.recent_qr_items = []  # reset before new import
-
+            self.recent_qr_items = []
             for p in products_list:
                 pid = p.get("ProductID")
                 name = p.get("Name")
                 qr_path = os.path.join(new_qr_dir, f"{pid}.png")
 
-                # Only collect newly inserted items
                 res = next((r for r in results if r["product_id"] == pid and r["action"] == "inserted"), None)
                 if res and os.path.exists(qr_path):
                     self.recent_qr_items.append({
-                        "image_path": qr_path,
-                        "product_id": pid,
-                        "product_name": name
+                        "image_path": qr_path, "product_id": pid, "product_name": name
                     })
 
-            # Step 4: Show import summary
             inserted = sum(1 for r in results if r["action"] == "inserted")
             updated = sum(1 for r in results if r["action"] == "updated")
             skipped = sum(1 for r in results if r["action"] == "skipped")
 
             messagebox.showinfo(
                 "نتیجه ورود اطلاعات",
-                f"محصولات وارد شده: {inserted}\n"
-                f"محصولات بروزرسانی شده: {updated}\n"
-                f"محصولات نادیده گرفته شده: {skipped}"
+                f"محصولات وارد شده: {inserted}\nمحصولات بروزرسانی شده: {updated}\nمحصولات نادیده گرفته شده: {skipped}"
             )
 
-            # Step 5: Enable PDF download button if new QR codes were created
-            if self.recent_qr_items:
-                self.download_pdf_btn.config(state="normal")
-            else:
-                self.download_pdf_btn.config(state="disabled")
+            self.download_pdf_btn.config(
+                state="normal" if self.recent_qr_items else "disabled"
+            )
 
         except Exception as e:
             messagebox.showerror("خطا", f"خطا در وارد کردن فایل اکسل:\n{e}")
 
     def download_qr_pdf(self):
-        """Combine recent QR codes into a single PDF and let the user save it."""
         if not getattr(self, "recent_qr_items", None):
             messagebox.showwarning("هشدار", "کد QR جدیدی برای دانلود وجود ندارد.")
             return
@@ -126,33 +108,20 @@ class ProductQRApp:
             filetypes=[("PDF files", "*.pdf")],
             initialfile="QRCodes.pdf"
         )
-
         if not save_path:
-            messagebox.showinfo("لغو شد", "عملیات ذخیره‌سازی لغو شد.")
             return
 
         try:
-            # try to create PDF; pdf_utils will auto-find a TTF font if available
-            # you can also pass font_path=r"C:\Windows\Fonts\Tahoma.ttf" explicitly
             create_qr_pdf(self.recent_qr_items, save_path, title="فهرست QR کدها")
             messagebox.showinfo("موفقیت", f"PDF با موفقیت ذخیره شد:\n{save_path}")
-        except RuntimeError as re:
-            # likely missing font — show clear instructions
-            messagebox.showerror(
-                "خطا در ساخت PDF",
-                "فونت سیستم فارسی را ساپورت نمیکند. tahoma.ttf را دانلود کرده و درمسیر C:\Windows\Fonts\Tahoma.ttf قرار دهید."
-            )
         except Exception as e:
-            messagebox.showerror("خطا در ساخت PDF", f"خطای غیرمنتظره هنگام ساخت PDF:\n{e}")
+            messagebox.showerror("خطا در ساخت PDF", f"خطا در ساخت PDF:\n{e}")
 
-
-
-    #----------Tab2: Insert single product----------
+    # ----------------- Tab 2: Insert Single Product -----------------
     def create_tab_add(self):
         tab_add = ttk.Frame(self.notebook)
         self.notebook.add(tab_add, text="درج محصول")
 
-        # Labels & Entries
         tk.Label(tab_add, text="شناسه محصول").grid(row=0, column=0, padx=10, pady=10, sticky="e")
         self.entry_single_id = tk.Entry(tab_add, width=40)
         self.entry_single_id.grid(row=0, column=1, pady=10)
@@ -165,12 +134,10 @@ class ProductQRApp:
         self.entry_single_price = tk.Entry(tab_add, width=40)
         self.entry_single_price.grid(row=2, column=1, pady=10)
 
-        # Insert button
         tk.Button(tab_add, text="درج کردن", command=self.insert_single_product_ui).grid(
             row=3, column=0, columnspan=2, pady=15
         )
 
-        # PDF download button (disabled initially)
         self.download_single_pdf_btn = tk.Button(
             tab_add,
             text="دانلود PDF کد QR محصول",
@@ -179,10 +146,7 @@ class ProductQRApp:
         )
         self.download_single_pdf_btn.grid(row=4, column=0, columnspan=2, pady=10)
 
-
-    #-----handler-----
     def insert_single_product_ui(self):
-        """Insert single product from entries and generate QR."""
         pid = self.entry_single_id.get().strip()
         name = self.entry_single_name.get().strip()
         price = self.entry_single_price.get().strip()
@@ -191,40 +155,23 @@ class ProductQRApp:
             messagebox.showwarning("هشدار", "لطفاً تمام فیلدها را پر کنید.")
             return
 
-        # validate price
-        from decimal import Decimal
         try:
             price_decimal = Decimal(price)
         except Exception:
             messagebox.showerror("خطا", "قیمت محصول نامعتبر است.")
             return
 
-        product = {
-            "ProductID": pid,
-            "Name": name,
-            "PriceUSD": price_decimal
-        }
-
+        product = {"ProductID": pid, "Name": name, "PriceUSD": price_decimal}
         try:
             result = self.db_manager.insert_single_product(product, qrcode_generator=self.qr_gen)
-
             action = result.get("action")
             reason = result.get("reason", "")
+            messagebox.showinfo("نتیجه درج محصول", f"وضعیت: {action}\n{reason}")
 
-            messagebox.showinfo(
-                "نتیجه درج محصول",
-                f"وضعیت: {action}\n{reason}"
-            )
-
-            # Track QR code path if inserted
             qr_dir = os.path.abspath("assets/MainQRCodes")
             qr_path = os.path.join(qr_dir, f"{pid}.png")
             if action == "inserted" and os.path.exists(qr_path):
-                self.recent_qr_items = [{
-                    "image_path": qr_path,
-                    "product_id": pid,
-                    "product_name": name
-                }]
+                self.recent_qr_items = [{"image_path": qr_path, "product_id": pid, "product_name": name}]
                 self.download_single_pdf_btn.config(state="normal")
             else:
                 self.download_single_pdf_btn.config(state="disabled")
@@ -232,9 +179,7 @@ class ProductQRApp:
         except Exception as e:
             messagebox.showerror("خطا", f"خطا در درج محصول:\n{e}")
 
-    #------pdf download handler-----
     def download_single_qr_pdf(self):
-        """Download PDF for the single inserted product QR code."""
         if not getattr(self, "recent_qr_items", None):
             messagebox.showwarning("هشدار", "کد QR محصول جدیدی برای دانلود وجود ندارد.")
             return
@@ -245,17 +190,154 @@ class ProductQRApp:
             filetypes=[("PDF files", "*.pdf")],
             initialfile=f"{self.recent_qr_items[0]['product_id']}_QR.pdf"
         )
-
         if not save_path:
-            messagebox.showinfo("لغو شد", "عملیات ذخیره‌سازی لغو شد.")
             return
 
         try:
-            from src.utils.pdf_utils import create_qr_pdf
             create_qr_pdf(self.recent_qr_items, save_path, title="QR کد محصول")
             messagebox.showinfo("موفقیت", f"PDF با موفقیت ذخیره شد:\n{save_path}")
         except Exception as e:
             messagebox.showerror("خطا در ساخت PDF", f"خطا در ساخت PDF:\n{e}")
+
+    # ----------------- Tab 3: Manage Products -----------------
+    def create_tab_manage(self):
+        tab_manage = ttk.Frame(self.notebook)
+        self.notebook.add(tab_manage, text="مدیریت محصولات")
+
+        # Search Controls
+        search_frame = ttk.Frame(tab_manage)
+        search_frame.pack(pady=10)
+
+        tk.Label(search_frame, text="جستجو بر اساس:").grid(row=0, column=0, padx=5)
+        self.search_type_manage = ttk.Combobox(
+            search_frame, values=["شناسه محصول", "نام محصول"], state="readonly", width=20
+        )
+        self.search_type_manage.current(0)
+        self.search_type_manage.grid(row=0, column=1, padx=5)
+
+        self.entry_search_manage = tk.Entry(search_frame, width=40)
+        self.entry_search_manage.grid(row=0, column=2, padx=5)
+
+        tk.Button(search_frame, text="جستجو", command=self.search_products_manage).grid(row=0, column=3, padx=5)
+
+        # Treeview Table
+        columns = ("ProductID", "Name", "PriceUSD", "QR")
+        self.tree_manage = ttk.Treeview(tab_manage, columns=columns, show="headings", height=15)
+        for col, text in zip(columns, ["شناسه", "نام محصول", "قیمت", "QR کد"]):
+            self.tree_manage.heading(col, text=text)
+            self.tree_manage.column(col, width=150, anchor="center")
+        self.tree_manage.pack(expand=True, fill="both", pady=10)
+
+        # Enable editing
+        self.tree_manage.bind("<Double-1>", self.on_cell_double_click_manage)
+
+        # Action Buttons
+        btn_frame = ttk.Frame(tab_manage)
+        btn_frame.pack(pady=10)
+        tk.Button(btn_frame, text="ذخیره تغییرات", command=self.save_table_changes).grid(row=0, column=0, padx=10)
+        tk.Button(btn_frame, text="دانلود QR PDF", command=self.download_selected_qr_pdf_manage).grid(row=0, column=1, padx=10)
+
+    # ----------------- Manage Tab Methods -----------------
+    def search_products_manage(self):
+        search_value = self.entry_search_manage.get().strip()
+        if not search_value:
+            messagebox.showwarning("هشدار", "لطفاً مقدار جستجو را وارد کنید.")
+            return
+
+        try:
+            if self.search_type_manage.get() == "شناسه محصول":
+                product = self.db_manager.get_product_by_id(search_value, None)
+                products = [product] if product else []
+            else:
+                products = self.db_manager.get_product_by_name(search_value, None)
+
+            for i in self.tree_manage.get_children():
+                self.tree_manage.delete(i)
+
+            for p in products:
+                self.tree_manage.insert(
+                    "",
+                    tk.END,
+                    values=(p.product_id, p.name, str(p.price), p.qr_path or ""),
+                )
+
+        except Exception as e:
+            messagebox.showerror("خطا در جستجو", f"خطا در واکشی داده‌ها:\n{e}")
+
+    def on_cell_double_click_manage(self, event):
+        region = self.tree_manage.identify_region(event.x, event.y)
+        if region != "cell":
+            return
+
+        row_id = self.tree_manage.identify_row(event.y)
+        col = self.tree_manage.identify_column(event.x)
+        col_index = int(col.replace("#", "")) - 1
+        if col_index not in (1, 2):  # Only Name, Price editable
+            return
+
+        x, y, width, height = self.tree_manage.bbox(row_id, col)
+        value = self.tree_manage.set(row_id, column=self.tree_manage["columns"][col_index])
+
+        entry = tk.Entry(self.tree_manage)
+        entry.place(x=x, y=y, width=width, height=height)
+        entry.insert(0, value)
+        entry.focus()
+
+        def save_edit(event):
+            new_val = entry.get()
+            entry.destroy()
+            self.tree_manage.set(row_id, column=self.tree_manage["columns"][col_index], value=new_val)
+            self.edited_cells[row_id] = self.tree_manage.item(row_id)["values"]
+
+        entry.bind("<Return>", save_edit)
+        entry.bind("<FocusOut>", lambda e: entry.destroy())
+
+    def save_table_changes(self):
+        if not self.edited_cells:
+            messagebox.showinfo("اطلاع", "هیچ تغییری برای ذخیره وجود ندارد.")
+            return
+
+        try:
+            for row_id, values in self.edited_cells.items():
+                pid, name, price, _ = values
+                product = {"ProductID": pid, "Name": name, "PriceUSD": Decimal(price)}
+                self.db_manager.insert_single_product(product, qrcode_generator=self.qr_gen)
+            messagebox.showinfo("موفقیت", "تغییرات با موفقیت ذخیره شد.")
+            self.edited_cells.clear()
+        except Exception as e:
+            messagebox.showerror("خطا در ذخیره", f"خطا در بروزرسانی محصولات:\n{e}")
+
+    def download_selected_qr_pdf_manage(self):
+        selected = self.tree_manage.selection()
+        if not selected:
+            messagebox.showwarning("هشدار", "هیچ محصولی انتخاب نشده است.")
+            return
+
+        item = self.tree_manage.item(selected[0])["values"]
+        product = {"product_id": item[0], "name": item[1], "price_usd": item[2], "qr_path": item[3]}
+        self.download_qr_pdf_for_product(product)
+
+    def download_qr_pdf_for_product(self, product):
+        if not product.get("qr_path") or not os.path.exists(product["qr_path"]):
+            messagebox.showwarning("هشدار", "فایل QR محصول یافت نشد.")
+            return
+
+        save_path = filedialog.asksaveasfilename(
+            title="ذخیره PDF کد QR محصول",
+            defaultextension=".pdf",
+            filetypes=[("PDF files", "*.pdf")],
+            initialfile=f"{product['product_id']}_QR.pdf"
+        )
+        if not save_path:
+            return
+
+        try:
+            qr_items = [{"image_path": product["qr_path"], "product_id": product["product_id"], "product_name": product["name"]}]
+            create_qr_pdf(qr_items, save_path, title="QR کد محصول")
+            messagebox.showinfo("موفقیت", f"PDF با موفقیت ذخیره شد:\n{save_path}")
+        except Exception as e:
+            messagebox.showerror("خطا در ساخت PDF", f"خطا در ساخت PDF:\n{e}")
+
 
 # ----------------- Run the app -----------------
 if __name__ == "__main__":
