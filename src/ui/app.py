@@ -782,7 +782,7 @@ class ProductQRApp:
         tk.Button(btn_frame, text="بروزرسانی لیست", command=self.load_all_products).grid(row=0, column=0, padx=5)
         tk.Button(btn_frame, text="ذخیره تغییرات", command=self.save_all_table_changes).grid(row=0, column=1, padx=5)
         tk.Button(btn_frame, text="حذف محصول", command=self.delete_selected_product).grid(row=0, column=2, padx=5)
-        tk.Button(btn_frame, text="دانلود QR PDF", command=self.download_selected_qr_pdf_all).grid(row=0, column=3, padx=5)
+        tk.Button(btn_frame, text="دانلود QR PDF", command=self.download_selected_qr_pdf).grid(row=0, column=3, padx=5)
 
         # --- Product Table ---
         columns = ("ProductID", "Name", "PriceUSD")
@@ -880,6 +880,38 @@ class ProductQRApp:
             messagebox.showinfo("موفقیت", f"محصول {product_id} حذف شد.")
         except Exception as e:
             messagebox.showerror("خطا در حذف", f"خطا در حذف محصول:\n{e}")
+            
+    def download_selected_qr_pdf(self):
+        """Download QR PDF for selected product."""
+        selected = self.tree_list_all.selection()
+        if not selected:
+            messagebox.showwarning("هشدار", "هیچ محصولی انتخاب نشده است.")
+            return
+
+        item = self.tree_list_all.item(selected[0])["values"]
+        product = {"product_id": item[0], "name": item[1], "price_usd": item[2]}
+        qr_dir = os.path.abspath("assets/MainQRCodes")
+        qr_path = os.path.join(qr_dir, f"{product['product_id']}.png")
+
+        if not os.path.exists(qr_path):
+            messagebox.showwarning("هشدار", "فایل QR محصول یافت نشد.")
+            return
+
+        save_path = filedialog.asksaveasfilename(
+            title="ذخیره PDF کد QR محصول",
+            defaultextension=".pdf",
+            filetypes=[("PDF files", "*.pdf")],
+            initialfile=f"{product['product_id']}_QR.pdf"
+        )
+        if not save_path:
+            return
+
+        try:
+            qr_items = [{"image_path": qr_path, "product_id": product["product_id"], "product_name": product["name"]}]
+            create_qr_pdf(qr_items, save_path, title="QR کد محصول")
+            messagebox.showinfo("موفقیت", f"PDF با موفقیت ذخیره شد:\n{save_path}")
+        except Exception as e:
+            messagebox.showerror("خطا در ساخت PDF", f"خطا در ساخت PDF:\n{e}")
 
 
 # ----------------- Run the app -----------------
