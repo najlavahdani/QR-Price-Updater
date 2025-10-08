@@ -813,6 +813,36 @@ class ProductQRApp:
                 self.tree_list_all.insert("", tk.END, values=(p.product_id, p.name, str(p.price)))
         except Exception as e:
             messagebox.showerror("خطا", f"خطا در بارگذاری محصولات:\n{e}")
+            
+    def on_cell_double_click_all(self, event):
+        """Enable editing for Name and Price cells."""
+        region = self.tree_list_all.identify_region(event.x, event.y)
+        if region != "cell":
+            return
+
+        row_id = self.tree_list_all.identify_row(event.y)
+        col = self.tree_list_all.identify_column(event.x)
+        col_index = int(col.replace("#", "")) - 1
+        if col_index not in (1, 2):  # Only Name and Price editable
+            return
+
+        x, y, width, height = self.tree_list_all.bbox(row_id, col)
+        value = self.tree_list_all.set(row_id, column=self.tree_list_all["columns"][col_index])
+
+        entry = tk.Entry(self.tree_list_all)
+        entry.place(x=x, y=y, width=width, height=height)
+        entry.insert(0, value)
+        entry.focus()
+
+        def save_edit(event):
+            new_val = entry.get()
+            entry.destroy()
+            self.tree_list_all.set(row_id, column=self.tree_list_all["columns"][col_index], value=new_val)
+            self.edited_cells_all[row_id] = self.tree_list_all.item(row_id)["values"]
+
+        entry.bind("<Return>", save_edit)
+        entry.bind("<FocusOut>", lambda e: entry.destroy())
+
 
 # ----------------- Run the app -----------------
 if __name__ == "__main__":
