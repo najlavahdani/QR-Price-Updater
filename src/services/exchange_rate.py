@@ -48,4 +48,4 @@ class ExchangeRate:
                 
     def calculate_price(self, usd_price: Decimal) -> Decimal:
         rate= self.get_rate()
-        return usd_price*rate
+        return int(usd_price*rate)
