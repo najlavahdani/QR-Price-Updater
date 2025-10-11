@@ -72,8 +72,8 @@ class DatabaseManager:
 
         return results
     
-    def insert_single_product(self, product: dict,*args,**kwargs) -> dict:
-        return self.insert_or_update_products([product],*args ,**kwargs)[0]
+    def insert_single_product(self, product: dict, *args, session: Session | None = None, **kwargs) -> dict:
+        return self.insert_or_update_products([product], *args, session=session, **kwargs)[0]
     
     def get_all_products(self, session: Session | None = None) -> List[Products]:
         with get_session() as s:
