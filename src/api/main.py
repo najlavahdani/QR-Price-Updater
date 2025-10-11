@@ -121,3 +121,9 @@ def api_get_exchange_rate():
         return {"exchange_rate": rate}
     except ValueError:
         raise HTTPException(status_code=404, detail=" Exchange rate not set")
+
+@app.post("/api/exchange-rate/")
+def api_set_exchange_rate(rate: Decimal):
+    ex = ExchangeRate()
+    setting = ex.set_rate(rate)
+    return{"Currency": setting.currency, "exchange_rate": setting.exchange_rate}
