@@ -90,3 +90,8 @@ def api_get_product_by_id(product_id: str):
     if not product:
         raise HTTPException(status_code=404, detail="Product Not found")
     return ({"ProductID": product.product_id, "Name": product.name, "PriceUSD":product.price})
+
+@app.get("/api/products/search/", response_model=List[ProductRead])
+def api_get_products_by_name(name: str):
+    products = db_manager.get_product_by_name(name)
+    return [{"ProductID": p.product_id, "Name": p.name, "PriceUSD": p.price} for p in products]
