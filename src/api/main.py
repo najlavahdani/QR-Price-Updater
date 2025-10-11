@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Depends, HTTPException
+from fastapi import FastAPI, Request, Depends, HTTPException, File, UploadFile
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from pathlib import Path
@@ -10,6 +10,7 @@ from typing import List
 from src.db.database import get_session
 from src.db.database_manager import DatabaseManager
 from src.services.exchange_rate import ExchangeRate
+from src.utils.data_loader import load_products_from_excel
 
 
 #Create a DatabaseManager instance with local base_url
@@ -109,9 +110,20 @@ def api_delete_product(product_id: str):
         return db_manager.delete_product(product_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) 
+
+@app.post("/aoi/products/upload/")
+def api_upload_products(file: UploadFile = File(...)):
+    #validata file type
+    if not file.filename.endswith((".xls", ".xlsx")):
+        raise HTTPException(status_code=400, detail= "Invalid file type. Must be EXCEL.")
+       
+    try:
+        products_list = load_products_from_excel(file.file)
+        results = db_manager.insert_or_update_products(products_list)
+        return{"status": "success", "results": results}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to process Excel file: {e}")
     
-
-
 #----------Settings(ExchangeRate)----------
 @app.get("/api/exchange-rate/")
 def api_get_exchange_rate():
@@ -127,3 +139,4 @@ def api_set_exchange_rate(rate: Decimal):
     ex = ExchangeRate()
     setting = ex.set_rate(rate)
     return{"Currency": setting.currency, "exchange_rate": setting.exchange_rate}
+
