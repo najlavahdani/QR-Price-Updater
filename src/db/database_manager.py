@@ -76,8 +76,15 @@ class DatabaseManager:
         return self.insert_or_update_products([product], *args, session=session, **kwargs)[0]
     
     def get_all_products(self, session: Session | None = None) -> List[Products]:
-        with get_session() as s:
-            return s.query(Products).all()
+        own_session = False
+        if session is None:
+            own_session = True
+            session = get_session().__enter__()
+        try:
+            return session.query(Products).all()
+        finally:
+            if own_session:
+                session.__exit__(None, None, None)
         
     def get_product_by_id(self, product_id: str, session: Session|None) -> Products | None:
         with get_session() as s:
