@@ -1,5 +1,6 @@
 import pytest
 from src.db.database_manager import DatabaseManager
+from src.db.models import Products
 from sqlalchemy.orm import sessionmaker
 from src.db.database import init_db
 from decimal import Decimal
@@ -34,29 +35,44 @@ def db_manager():
     return DatabaseManager()
 
 #----------Tests----------
-def test_insert_update_product(db_manager, temp_session):
+def test_insert_update_product(db_manager, temp_session, qr_gen):
+    # cleaning database
+    temp_session.query(Products).delete()
+    temp_session.commit()
+
+    #insert test
     products = [
-        {"ProductID": "P100", "Name": "Laptop Dell", "PriceUSD": "1000.50"},
-        {"ProductID": "P101", "Name": "Laptop HP", "PriceUSD": "950.75"},
+        {"ProductID": "P200", "Name": "Laptop Dell", "PriceUSD": "1000.50"},
+        {"ProductID": "P201", "Name": "Laptop HP", "PriceUSD": "950.75"},
     ]
-    
-    #insertion test
-    result= db_manager.insert_or_update_products(products, qr_gen, session=temp_session)
+
+    result = db_manager.insert_or_update_products(products, qr_gen)
     assert result[0]["action"] == "inserted"
     assert result[1]["action"] == "inserted"
+
     
+    with db_manager.get_session() as s:
+        p200 = s.query(Products).filter_by(product_id="P200").one()
+        p201 = s.query(Products).filter_by(product_id="P201").one()
+        assert p200.name == "Laptop Dell"
+        assert p201.price == Decimal("950.75")
+
     #update test
-    prod_to_update={"ProductID": "P100", "Name": "Laptop Dell", "PriceUSD": "1100.00"}
-    update_result= db_manager.insert_or_update_products([prod_to_update], qr_gen, session=temp_session)
+    prod_to_update = {"ProductID": "P200", "Name": "Laptop Dell X", "PriceUSD": "1100.00"}
+    update_result = db_manager.insert_or_update_products([prod_to_update], qr_gen)
     assert update_result[0]["action"] == "updated"
-    updated_prod = db_manager.get_product_by_id("P100", session=temp_session)
-    assert updated_prod.price == Decimal("1100.00")
+
     
-    #update test with no changes in database (skipped)
-    prod_no_change = {"ProductID": "P101", "Name": "Laptop HP", "PriceUSD": "950.75"}
-    no_change_result= db_manager.insert_or_update_products([prod_no_change], qr_gen, session=temp_session)
+    with db_manager.get_session() as s:
+        updated_prod = s.query(Products).filter_by(product_id="P200").one()
+        assert updated_prod.name == "Laptop Dell X"
+        assert updated_prod.price == Decimal("1100.00")
+
+    #skip test
+    prod_no_change = {"ProductID": "P201", "Name": "Laptop HP", "PriceUSD": "950.75"}
+    no_change_result = db_manager.insert_or_update_products([prod_no_change], qr_gen)
     assert no_change_result[0]["action"] == "skipped"
-    
+    assert "no changes" in no_change_result[0]["reason"]    
 
 def teat_insert_single_product(db_manager, temp_session):
     #single product
