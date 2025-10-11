@@ -4,8 +4,8 @@ from src.utils.data_loader import load_products_from_excel
 
 class TestDataLoader(unittest.TestCase):
     def test_load_products(self):
-        BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-        excel_path = os.path.join(BASE_DIR, "data", "products.xlsx")
+        BASE_DIR = os.path.dirname(os.path.dirname(__file__)) #QR price updater
+        excel_path = os.path.join(BASE_DIR, "test_data", "products.xlsx") #QR price updater/data/product.xlsx
         products = load_products_from_excel(excel_path)
         self.assertIsInstance(products, list)
         self.assertIn("ProductID", products[0])

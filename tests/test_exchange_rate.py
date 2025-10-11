@@ -19,18 +19,18 @@ def temp_session():
     
 #----------text----------
 def test_set_and_get_rate(temp_session):
-    ex_rate= ExchangeRate(temp_session)
+    ex_rate= ExchangeRate()
     
-    ex_rate.set_rate(Decimal("100000"))
+    ex_rate.set_rate(Decimal("100000"), session= temp_session)
     rate= ex_rate.get_rate()
     
     assert rate == Decimal("100000")
 
     
 def test_update_rate(temp_session):
-    ex_rate= ExchangeRate(temp_session)
+    ex_rate= ExchangeRate()
     
-    ex_rate.set_rate(Decimal("60000"))
+    ex_rate.set_rate(Decimal("60000"), session= temp_session)
     ex_rate.set_rate(Decimal("65000"))  #update
     
     rate= ex_rate.get_rate()
@@ -38,9 +38,9 @@ def test_update_rate(temp_session):
     
 
 def test_calculate_price(temp_session):
-    ex_rate = ExchangeRate(temp_session)
+    ex_rate = ExchangeRate()
     
-    ex_rate.set_rate(Decimal("60000"))
-    result= ex_rate.calculate_price(Decimal("2"))
+    ex_rate.set_rate(Decimal("60000"), session= temp_session)
+    result= ex_rate.calculate_price(Decimal("2"), temp_session)
     
     assert Decimal(120000) == result
