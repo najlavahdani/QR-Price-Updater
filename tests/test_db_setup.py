@@ -23,8 +23,8 @@ def temp_session(temp_engine):
     yield session
     session.close()
     
-def test_get_session(temp_session): #creating in-memory temp db and session
-    with get_session(temp_session) as session:
+def test_get_session(): #creating in-memory temp db and session
+    with get_session() as session:
         #this command does not require any tables, it is only used to test the connection and correct db performance
         result = session.execute(text("SELECT 1")).scalar()
         assert result == 1
