@@ -79,6 +79,14 @@ class ProductRead(BaseModel):
         
 #----------products----------
 @app.get("/api/products/", response_model=List[ProductRead])
-def api_get_products():
+def api_get_all_products():
     products= db_manager.get_all_products()
     return [{"ProductID": p.product_id, "Name": p.name, "PriceUSD": p.price} for p in products]
+
+
+@app.get("/api/products/{product_id}", response_model=ProductRead)
+def api_get_product_by_id(product_id: str):
+    product = db_manager.get_product_by_id(product_id, None)
+    if not product:
+        raise HTTPException(status_code=404, detail="Product Not found")
+    return ({"ProductID": product.product_id, "Name": product.name, "PriceUSD":product.price})
