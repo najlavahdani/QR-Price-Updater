@@ -109,3 +109,15 @@ def api_delete_product(product_id: str):
         return db_manager.delete_product(product_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) 
+    
+
+
+#----------Settings(ExchangeRate)----------
+@app.get("/api/exchange-rate/")
+def api_get_exchange_rate():
+    ex = ExchangeRate()
+    try:
+        rate = ex.get_rate()
+        return {"exchange_rate": rate}
+    except ValueError:
+        raise HTTPException(status_code=404, detail=" Exchange rate not set")
