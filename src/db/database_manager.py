@@ -99,10 +99,17 @@ class DatabaseManager:
         
     def get_product_by_name(self, name: str, session: Session|None) -> List[Products]:
         #fetch all products whose names contain text (case insensetive)
-        with get_session() as s:
-            statement= select(Products).where(Products.name.ilike(f"%{name}%"))
-            result= s.execute(statement).scalars().all()
+        own_session = False
+        if session is None:
+            own_session = True
+            session = get_session().__enter__()
+        try:
+            statement = select(Products).where(Products.name.ilike(f"%{name}%"))
+            result = session.execute(statement).scalars().all()
             return result
+        finally:
+            if own_session:
+                session.__exit__(None, None, None)
         
     def delete_product(self, product_id: str):
         """
