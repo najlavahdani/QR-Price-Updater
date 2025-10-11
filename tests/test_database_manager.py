@@ -6,6 +6,7 @@ from src.db.database import init_db
 from decimal import Decimal
 from sqlalchemy import create_engine
 import os
+# from src.db.database import get_session
 from src.services.qrcode_generator import QRCodeGenerator
 
 #custom path to save qr images
@@ -35,7 +36,7 @@ def db_manager():
     return DatabaseManager()
 
 #----------Tests----------
-def test_insert_update_product(db_manager, temp_session, qr_gen):
+def test_insert_update_product(db_manager, temp_session):
     # cleaning database
     temp_session.query(Products).delete()
     temp_session.commit()
@@ -46,31 +47,30 @@ def test_insert_update_product(db_manager, temp_session, qr_gen):
         {"ProductID": "P201", "Name": "Laptop HP", "PriceUSD": "950.75"},
     ]
 
-    result = db_manager.insert_or_update_products(products, qr_gen)
+    result = db_manager.insert_or_update_products(products, qr_gen, temp_session)
     assert result[0]["action"] == "inserted"
     assert result[1]["action"] == "inserted"
 
     
-    with db_manager.get_session() as s:
-        p200 = s.query(Products).filter_by(product_id="P200").one()
-        p201 = s.query(Products).filter_by(product_id="P201").one()
-        assert p200.name == "Laptop Dell"
-        assert p201.price == Decimal("950.75")
-
-    #update test
-    prod_to_update = {"ProductID": "P200", "Name": "Laptop Dell X", "PriceUSD": "1100.00"}
-    update_result = db_manager.insert_or_update_products([prod_to_update], qr_gen)
-    assert update_result[0]["action"] == "updated"
+    
+    p200 = temp_session.query(Products).filter_by(product_id="P200").one()
+    p201 = temp_session.query(Products).filter_by(product_id="P201").one()
+    assert p200.name == "Laptop Dell"
+    assert p201.price == Decimal("950.75")
 
     
-    with db_manager.get_session() as s:
-        updated_prod = s.query(Products).filter_by(product_id="P200").one()
-        assert updated_prod.name == "Laptop Dell X"
-        assert updated_prod.price == Decimal("1100.00")
+
+    prod_to_update = {"ProductID": "P200", "Name": "Laptop Dell X", "PriceUSD": "1100.00"}
+    update_result = db_manager.insert_or_update_products([prod_to_update], qr_gen, temp_session)
+    assert update_result[0]["action"] == "updated"
+
+    updated_prod = temp_session.query(Products).filter_by(product_id="P200").one()
+    assert updated_prod.name == "Laptop Dell X"
+    assert updated_prod.price == Decimal("1100.00")
 
     #skip test
     prod_no_change = {"ProductID": "P201", "Name": "Laptop HP", "PriceUSD": "950.75"}
-    no_change_result = db_manager.insert_or_update_products([prod_no_change], qr_gen)
+    no_change_result = db_manager.insert_or_update_products([prod_no_change], qr_gen, temp_session)
     assert no_change_result[0]["action"] == "skipped"
     assert "no changes" in no_change_result[0]["reason"]    
 
