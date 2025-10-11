@@ -18,50 +18,58 @@ class DatabaseManager:
         Returns list of result dicts: {'product_id': ..., 'action': 'inserted'|'updated'|'skipped', 'reason': ...}
         """
         results= []
-        with get_session() as s:
-            try: 
-                for p in products:
-                    pid= str(p.get("ProductID")).strip()
-                    name= str(p.get("Name")).strip()
-                    try:
-                        price = Decimal(str(p.get("PriceUSD")))
-                    except Exception:
-                        results.append({"product_id": pid, "action": "skipped", "reason": "invalid PriceUSD"})
-                        continue
-                    
-                    #ProductID shouldn't be null
-                    if not pid:
-                        results.append({"product_id": None, "action": "skipped", "reason": "empty ProductID"})
-                        continue
-                    
-                    #check if the current product is already exists in DB or not: None if doesn't exists| Products object if exists
-                    existing = s.query(Products).filter_by(product_id=pid).one_or_none()
-                    if existing: #True if the current product already exists in DB
-                        # the product will update only if there is a difference
-                        changed= False
-                        if existing.name != name:
-                            existing.name = name
-                            changed= True
-                        if Decimal(str((existing.price))) != price:
-                            existing.price = price
-                            changed= True
-                        
-                        if changed: #True if update the product 
-                            results.append({"product_id": pid, "action": "updated"})
-                        else:
-                            results.append({"product_id": pid, "action": "skipped", "reason": "already exist, with no changes"})
-                            
-                    else: #new product
-                        new_product= Products(product_id=pid, name=name, price=price, qr_path=None)
-                        s.add(new_product)
-                        s.flush() #temporary commit to get id
-                        qr_gen_to_use= qrcode_generator or self.qr_generator
-                        new_product.qr_path= qr_gen_to_use.generate_qr(pid)
-                        results.append({"product_id": pid, "action": "inserted"})
-                s.commit()
-            except Exception as e:
-                s.rollback()
-                raise RuntimeError(f"DB insert faild: {e}")
+        own_session = False  # Track if we created the session ourselves
+
+        if session is None:
+            own_session = True
+            session = get_session().__enter__()  # Manually enter context
+
+        try:
+            for p in products:
+                pid = str(p.get("ProductID")).strip()
+                name = str(p.get("Name")).strip()
+
+                try:
+                    price = Decimal(str(p.get("PriceUSD")))
+                except Exception:
+                    results.append({"product_id": pid, "action": "skipped", "reason": "invalid PriceUSD"})
+                    continue
+
+                if not pid:
+                    results.append({"product_id": None, "action": "skipped", "reason": "empty ProductID"})
+                    continue
+
+                existing = session.query(Products).filter_by(product_id=pid).one_or_none()
+                if existing:
+                    changed = False
+                    if existing.name != name:
+                        existing.name = name
+                        changed = True
+                    if Decimal(str(existing.price)) != price:
+                        existing.price = price
+                        changed = True
+
+                    if changed:
+                        results.append({"product_id": pid, "action": "updated"})
+                    else:
+                        results.append({"product_id": pid, "action": "skipped", "reason": "already exist, with no changes"})
+                else:
+                    new_product = Products(product_id=pid, name=name, price=price, qr_path=None)
+                    session.add(new_product)
+                    session.flush()
+
+                    qr_gen_to_use = qrcode_generator or self.qr_generator
+                    new_product.qr_path = qr_gen_to_use.generate_qr(pid)
+                    results.append({"product_id": pid, "action": "inserted"})
+
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            raise RuntimeError(f"DB insert failed: {e}")
+        finally:
+            if own_session:
+                session.__exit__(None, None, None)
+
         return results
     
     def insert_single_product(self, product: dict,*args,**kwargs) -> dict:
@@ -86,12 +94,19 @@ class DatabaseManager:
         """
         Delete a product from the database by its ProductID.
         """
-        with get_session() as s:
-            product = s.query(Products).filter_by(product_id=product_id).first()
+        own_session = False
+        if session is None:
+            own_session = True
+            session = get_session().__enter__()
+        try:
+            product = session.query(Products).filter_by(product_id=product_id).first()
             if not product:
                 raise ValueError(f"Product with ID {product_id} not found.")
-            s.delete(product)
-            s.commit()
+            session.delete(product)
+            session.commit()
             return {"status": "deleted", "product_id": product_id}
+        finally:
+            if own_session:
+                session.__exit__(None, None, None)
         
         
