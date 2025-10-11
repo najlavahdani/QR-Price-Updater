@@ -22,7 +22,7 @@ def test_set_and_get_rate(temp_session):
     ex_rate= ExchangeRate()
     
     ex_rate.set_rate(Decimal("100000"), session= temp_session)
-    rate= ex_rate.get_rate()
+    rate= ex_rate.get_rate(session= temp_session)
     
     assert rate == Decimal("100000")
 
