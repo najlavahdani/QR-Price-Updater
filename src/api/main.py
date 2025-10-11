@@ -99,6 +99,6 @@ def api_get_products_by_name(name: str):
     return [{"ProductID": p.product_id, "Name": p.name, "PriceUSD": p.price} for p in products]
 
 @app.post("/api/products/", response_model=ProductRead)
-def api_create_products(product: ProductCreate):
+def api_create_update_products(product: ProductCreate):
     result = db_manager.insert_single_product(product.dict())
     return {"ProductID": result["product_id"], "Name": product.Name, "PriceUSD": product.PriceUSD}
