@@ -102,3 +102,10 @@ def api_get_products_by_name(name: str):
 def api_create_update_products(product: ProductCreate):
     result = db_manager.insert_single_product(product.dict())
     return {"ProductID": result["product_id"], "Name": product.Name, "PriceUSD": product.PriceUSD}
+
+@app.delete("/api/products/{product_id}")
+def api_delete_product(product_id: str):
+    try:
+        return db_manager.delete_product(product_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) 
