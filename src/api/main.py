@@ -5,6 +5,7 @@ from pathlib import Path
 from sqlalchemy.orm import Session
 from decimal import Decimal
 from pydantic import BaseModel
+from typing import List
 
 from src.db.database import get_session
 from src.db.database_manager import DatabaseManager
@@ -75,3 +76,9 @@ class ProductRead(BaseModel):
     
     class config:
         orm_mode=True
+        
+#----------products----------
+@app.get("/api/products/", response_model=List[ProductRead])
+def api_get_products():
+    products= db_manager.get_all_products()
+    return [{"ProductID": p.product_id, "Name": p.name, "PriceUSD": p.price} for p in products]
