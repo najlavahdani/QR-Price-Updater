@@ -64,11 +64,13 @@ def product_page(
 
 #json API endpoints for progarm
 #pydantic schemas
+#input schema
 class ProductCreate(BaseModel):
     ProductID: str
     Name: str
     PriceUSD: Decimal
-    
+
+#output schema
 class ProductRead(BaseModel):
     ProductID: str
     Name: str
@@ -95,3 +97,8 @@ def api_get_product_by_id(product_id: str):
 def api_get_products_by_name(name: str):
     products = db_manager.get_product_by_name(name)
     return [{"ProductID": p.product_id, "Name": p.name, "PriceUSD": p.price} for p in products]
+
+@app.post("/api/products/", response_model=ProductRead)
+def api_create_products(product: ProductCreate):
+    result = db_manager.insert_single_product(product.dict())
+    return {"ProductID": result["product_id"], "Name": product.Name, "PriceUSD": product.PriceUSD}
