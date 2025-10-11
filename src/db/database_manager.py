@@ -87,8 +87,15 @@ class DatabaseManager:
                 session.__exit__(None, None, None)
         
     def get_product_by_id(self, product_id: str, session: Session|None) -> Products | None:
-        with get_session() as s:
-            return s.query(Products).filter_by(product_id=product_id).one_or_none()
+        own_session = False
+        if session is None:
+            own_session = True
+            session = get_session().__enter__()
+        try:
+            return session.query(Products).filter_by(product_id=product_id).one_or_none()
+        finally:
+            if own_session:
+                session.__exit__(None, None, None)
         
     def get_product_by_name(self, name: str, session: Session|None) -> List[Products]:
         #fetch all products whose names contain text (case insensetive)
